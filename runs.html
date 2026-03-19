@@ -14,7 +14,7 @@
     window.location.href = "/";
   }
 
-  const API_URL = "https://your-worker-url.workers.dev"; // replace this
+  const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
   async function loadRuns() {
     const res = await fetch(`${API_URL}/api/runs`);
@@ -26,14 +26,17 @@
     runs.forEach(run => {
       const div = document.createElement("div");
 
-      div.innerHTML = `
-        <h3>${new Date(run.start_time).toLocaleString()}</h3>
-        <p>${run.location_name}</p>
-        <p>${run.player_count} / ${run.max_players} players</p>
+      const date = new Date(run.start_time);
 
-        <input placeholder="Name" id="name-${run.id}" />
-        <input placeholder="Email" id="email-${run.id}" />
+      div.innerHTML = `
+        <h3>${date.toLocaleString()}</h3>
+        <p>${run.location_name}</p>
+        <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
+
+        <input placeholder="Your name" id="name-${run.id}" />
+        <input placeholder="Your email" id="email-${run.id}" />
         <button onclick="joinRun(${run.id})">I'm In</button>
+
         <hr />
       `;
 
@@ -45,19 +48,30 @@
     const name = document.getElementById(`name-${id}`).value;
     const email = document.getElementById(`email-${id}`).value;
 
+    if (!name || !email) {
+      alert("Enter name and email");
+      return;
+    }
+
     const res = await fetch(`${API_URL}/api/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ run_id: id, name, email })
+      body: JSON.stringify({
+        run_id: id,
+        name,
+        email
+      })
     });
 
     const data = await res.json();
 
-    alert(data.status === "confirmed"
-      ? "You're in!"
-      : "Added to waitlist");
+    alert(
+      data.status === "confirmed"
+        ? "You're in ✅"
+        : "Run is full — added to waitlist 🕒"
+    );
 
     loadRuns();
   }
