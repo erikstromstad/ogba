@@ -28,7 +28,7 @@
     <input type="number" id="max" value="20" /><br/><br/>
 
     <label>Notes:</label><br/>
-    <input type="text" id="notes" placeholder="Text" /><br/><br/>
+    <input type="text" id="notes" placeholder="Doors open at 6:30" /><br/><br/>
 
     <button onclick="createRun()">Add to schedule</button>
 
@@ -51,15 +51,13 @@
         document.getElementById("admin").style.display = "block";
 
         loadRuns(); 
-
       } else {
         document.getElementById("error").innerText = "Wrong password";
       }
     }
 
     async function createRun() {
-      const raw = document.getElementById("datetime").value;
-      const datetime = new Date(raw).toISOString();
+      const datetime = document.getElementById("datetime").value; // ✅ NO conversion
       const location = document.getElementById("location").value;
       const max = document.getElementById("max").value;
       const notes = document.getElementById("notes").value;
@@ -86,7 +84,7 @@
 
       if (data.success) {
         document.getElementById("message").innerText = "Game created!";
-        loadRuns(); // refresh list
+        loadRuns();
       } else {
         document.getElementById("message").innerText = "Error creating game";
       }
@@ -102,7 +100,8 @@
       runs.forEach(run => {
         const div = document.createElement("div");
 
-        const date = new Date(run.start_time).toISOString().slice(0,16);
+        // ✅ NO Date() conversion
+        const date = run.start_time.slice(0,16);
 
         div.innerHTML = `
           <input type="datetime-local" value="${date}" id="date-${run.id}" />
@@ -121,8 +120,7 @@
     }
 
     async function updateRun(id) {
-      const raw = document.getElementById(`date-${id}`).value;
-      const datetime = new Date(raw).toISOString();
+      const datetime = document.getElementById(`date-${id}`).value; // ✅ NO conversion
       const location = document.getElementById(`loc-${id}`).value;
       const max = document.getElementById(`max-${id}`).value;
       const notes = document.getElementById(`notes-${id}`).value;
