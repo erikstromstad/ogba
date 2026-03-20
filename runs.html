@@ -26,10 +26,30 @@
 runs.forEach(run => {
   const div = document.createElement("div");
 
-const date = run.start_time.replace("T", " ");
+const [datePart, timePart] = run.start_time.split("T");
+
+const [year, month, day] = datePart.split("-");
+const [hour, minute] = timePart.split(":");
+
+// Create a date object WITHOUT timezone conversion issues
+const dateObj = new Date(year, month - 1, day, hour, minute);
+
+// Format date
+const formattedDate = dateObj.toLocaleDateString("en-US", {
+  weekday: "long",
+  month: "numeric",
+  day: "numeric",
+  year: "numeric"
+});
+
+// Format time (12-hour)
+const formattedTime = dateObj.toLocaleTimeString("en-US", {
+  hour: "numeric",
+  minute: "2-digit"
+});
 
   div.innerHTML = `
-    <h3>${date}</h3>
+    <h3>${formattedDate} at ${formattedTime}</h3>
     <p>${run.location_name}</p>
     <p><em>${run.notes || ""}</em></p>
     <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
