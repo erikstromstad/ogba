@@ -23,25 +23,30 @@
     const container = document.getElementById("runs");
     container.innerHTML = "";
 
-    runs.forEach(run => {
-      const div = document.createElement("div");
+runs.forEach(run => {
+  const div = document.createElement("div");
 
-      const date = new Date(run.start_time);
+  const date = new Date(run.start_time);
 
-      div.innerHTML = `
-        <h3>${date.toLocaleString()}</h3>
-        <p>${run.location_name}</p>
-        <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
+  div.innerHTML = `
+    <h3>${date.toLocaleString()}</h3>
+    <p>${run.location_name}</p>
+    <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
 
-        <input placeholder="Your name" id="name-${run.id}" />
-        <input placeholder="Your email" id="email-${run.id}" />
-        <button onclick="joinRun(${run.id})">I'm In</button>
+    <input placeholder="Your name" id="name-${run.id}" />
+    <input placeholder="Your email" id="email-${run.id}" />
+    <button onclick="joinRun(${run.id})">I'm In</button>
+    <button onclick="leaveRun(${run.id})">Leave Run</button>
 
-        <hr />
-      `;
+    <div id="players-${run.id}">Loading players...</div>
 
-      container.appendChild(div);
-    });
+    <hr />
+  `;
+
+  container.appendChild(div);
+
+  loadPlayers(run.id);
+});
   }
 
   async function joinRun(id) {
@@ -77,6 +82,41 @@
   }
 
   loadRuns();
+
+  async function loadPlayers(runId) {
+  const res = await fetch(`${API_URL}/api/players?run_id=${runId}`);
+  const players = await res.json();
+
+  const list = players.map(p => {
+    return `<li>${p.name} (${p.status})</li>`;
+  }).join("");
+
+  document.getElementById(`players-${runId}`).innerHTML = `<ul>${list}</ul>`;
+}
+
+async function leaveRun(id) {
+  const email = document.getElementById(`email-${id}`).value;
+
+  if (!email) {
+    alert("Enter your email to cancel");
+    return;
+  }
+
+  await fetch(`${API_URL}/api/cancel`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      run_id: id,
+      email
+    })
+  });
+
+  alert("Removed from run");
+
+  loadRuns();
+}
 </script>
 </body>
 </html>
