@@ -1,44 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<div class="navbar">
+  <a href="/">OGBA</a>
+  <a href="/runs">Runs</a>
+  <a href="/admin.html">Admin</a>
+</div>
+  <head>
   <meta charset="UTF-8">
   <title>OGBA Pickup Basketball</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-      align-items: center;
-      justify-content: center;
-      background: #111;
-      color: white;
-    }
-    .box {
-      text-align: center;
-    }
-    input {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>OGBA Pickup Basketball</h1>
-    <p>Enter password to view upcoming pickup games</p>
 
-    <input type="password" id="password" placeholder="Password" />
-    <br />
-    <button onclick="checkPassword()">Enter</button>
+  
+  
+  <link rel="stylesheet" href="style.css">
 
-    <p id="error" style="color:red;"></p>
+<div class="navbar">
+  <a href="/">OGBA</a>
+  <a href="/runs">Runs</a>
+</div>
+
+<div class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    Old Guys Basketball Association
   </div>
+</div>
+
+<div class="container center">
+  <h2>Pickup Basketball. No BS.</h2>
+  <p>Check upcoming games and lock in your spot.</p>
+
+  <a href="/runs">
+    <button>View Games</button>
+  </a>
+</div>
 
   <script>
     const PASSWORD = "hoops4life";
