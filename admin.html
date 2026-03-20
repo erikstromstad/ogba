@@ -34,17 +34,19 @@
     const PASSWORD = "Adrian";
     const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
-    function checkPassword() {
-      const input = document.getElementById("password").value;
+function checkPassword() {
+  const input = document.getElementById("password").value;
 
-      if (input === PASSWORD) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("admin").style.display = "block";
-      } else {
-        document.getElementById("error").innerText = "Wrong password";
-      }
-    }
+  if (input === PASSWORD) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("admin").style.display = "block";
+
     loadRuns();
+
+  } else {
+    document.getElementById("error").innerText = "Wrong password";
+  }
+}
     async function createRun() {
       const datetime = document.getElementById("datetime").value;
       const location = document.getElementById("location").value;
@@ -71,6 +73,7 @@
 
       if (data.success) {
         document.getElementById("message").innerText = "Run created!";
+         loadRuns(); 
       } else {
         document.getElementById("message").innerText = "Error creating run";
       }
