@@ -1,159 +1,92 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+/* ===== Global ===== */
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #000;
+  color: #fff;
+}
 
-\f0\fs24 \cf0 body\{\
-font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;\
-margin:0;\
-color:#222;\
-line-height:1.6;\
-\}\
-\
-nav\{\
-display:flex;\
-justify-content:space-between;\
-align-items:center;\
-padding:20px 40px;\
-background:white;\
-position:sticky;\
-top:0;\
-border-bottom:1px solid #eee;\
-\}\
-\
-.logo\{\
-font-weight:600;\
-\}\
-\
-.navlinks a\{\
-margin-left:20px;\
-text-decoration:none;\
-color:#333;\
-\}\
-\
-.hero\{\
-background:url(hero.jpg) center/cover;\
-height:70vh;\
-display:flex;\
-align-items:center;\
-justify-content:center;\
-text-align:center;\
-color:white;\
-\}\
-\
-.hero-content\{\
-max-width:700px;\
-\}\
-\
-.hero h1\{\
-font-size:42px;\
-margin-bottom:10px;\
-\}\
-\
-.buttons\{\
-margin-top:20px;\
-\}\
-\
-.btn\{\
-background:#1d3b6a;\
-color:white;\
-padding:12px 20px;\
-text-decoration:none;\
-border-radius:6px;\
-margin-right:10px;\
-\}\
-\
-.btn-outline\{\
-border:2px solid white;\
-padding:10px 20px;\
-color:white;\
-text-decoration:none;\
-border-radius:6px;\
-\}\
-\
-.section\{\
-padding:80px 20px;\
-max-width:1000px;\
-margin:auto;\
-\}\
-\
-.about\{\
-display:flex;\
-gap:40px;\
-align-items:center;\
-flex-wrap:wrap;\
-\}\
-\
-.profile\{\
-width:240px;\
-border-radius:8px;\
-\}\
-\
-.about-text\{\
-flex:1;\
-min-width:260px;\
-\}\
-\
-.impact-grid\{\
-display:grid;\
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));\
-gap:25px;\
-margin-top:40px;\
-\}\
-\
-.card\{\
-background:#f6f6f6;\
-padding:25px;\
-border-radius:10px;\
-\}\
-\
-.resume iframe\{\
-width:100%;\
-height:80vh;\
-border:none;\
-\}\
-\
-.contact form\{\
-max-width:500px;\
-margin:auto;\
-display:flex;\
-flex-direction:column;\
-gap:15px;\
-\}\
-\
-input,textarea\{\
-padding:12px;\
-font-size:16px;\
-border:1px solid #ccc;\
-border-radius:5px;\
-\}\
-\
-button\{\
-background:#1d3b6a;\
-color:white;\
-padding:14px;\
-border:none;\
-border-radius:6px;\
-cursor:pointer;\
-\}\
-\
-footer\{\
-text-align:center;\
-padding:40px;\
-color:#777;\
-\}\
-\
-@media(max-width:700px)\{\
-\
-.hero h1\{\
-font-size:32px;\
-\}\
-\
-.about\{\
-flex-direction:column;\
-text-align:center;\
-\}\
-\
-\}}
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  background-color: #111;
+  padding: 15px 20px;
+  border-bottom: 1px solid #333;
+}
+
+.navbar a {
+  margin-right: 20px;
+  font-weight: bold;
+}
+
+/* ===== Hero ===== */
+.hero {
+  position: relative;
+  height: 300px;
+  background: url("hero-ogba.jpg") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+}
+
+.hero-text {
+  position: relative;
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ===== Cards ===== */
+.card {
+  background: #111;
+  border: 1px solid #333;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+
+/* ===== Inputs ===== */
+input, button {
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: none;
+}
+
+input {
+  width: 100%;
+  background: #222;
+  color: #fff;
+}
+
+button {
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #ccc;
+}
+
+/* ===== Utility ===== */
+.center {
+  text-align: center;
+}
