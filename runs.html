@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Available Runs</title>
+  <title>Upcoming OGBA Pickup Games</title>
 </head>
 <body>
-  <h1>Upcoming Runs</h1>
+  <h1>Upcoming OGBA Pickup Games</h1>
 
   <div id="runs"></div>
 
@@ -36,7 +36,7 @@ runs.forEach(run => {
     <input placeholder="Your name" id="name-${run.id}" />
     <input placeholder="Your email" id="email-${run.id}" />
     <button onclick="joinRun(${run.id})">I'm In</button>
-    <button onclick="leaveRun(${run.id})">Leave Run</button>
+    <button onclick="leaveRun(${run.id})">Cancel</button>
 
     <div id="players-${run.id}">Loading players...</div>
 
