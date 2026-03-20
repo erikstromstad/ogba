@@ -58,7 +58,8 @@
     }
 
     async function createRun() {
-      const datetime = document.getElementById("datetime").value;
+      const raw = document.getElementById("datetime").value;
+      const datetime = new Date(raw).toISOString();
       const location = document.getElementById("location").value;
       const max = document.getElementById("max").value;
       const notes = document.getElementById("notes").value;
@@ -120,7 +121,8 @@
     }
 
     async function updateRun(id) {
-      const datetime = document.getElementById(`date-${id}`).value;
+      const raw = document.getElementById(`date-${id}`).value;
+      const datetime = new Date(raw).toISOString();
       const location = document.getElementById(`loc-${id}`).value;
       const max = document.getElementById(`max-${id}`).value;
       const notes = document.getElementById(`notes-${id}`).value;
