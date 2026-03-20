@@ -20,10 +20,10 @@
     <input type="datetime-local" id="datetime" /><br/><br/>
 
     <label>Location Name:</label><br/>
-    <input type="text" id="location" placeholder="Wilshire Elementary" /><br/><br/>
+    <input type="text" id="location" placeholder="." /><br/><br/>
 
     <label>Max Players:</label><br/>
-    <input type="number" id="max" value="20" /><br/><br/>
+    <input type="number" id="max" value="." /><br/><br/>
 
     <button onclick="createRun()">Add to schedule</button>
 
@@ -72,10 +72,10 @@ function checkPassword() {
       const data = await res.json();
 
       if (data.success) {
-        document.getElementById("message").innerText = "Run created!";
+        document.getElementById("message").innerText = "Game created!";
          loadRuns(); 
       } else {
-        document.getElementById("message").innerText = "Error creating run";
+        document.getElementById("message").innerText = "Error creating game";
       }
       async function loadRuns() {
   const res = await fetch(`${API_URL}/api/runs`);
@@ -120,7 +120,7 @@ async function updateRun(id) {
 }
 
 async function deleteRun(id) {
-  if (!confirm("Delete this run?")) return;
+  if (!confirm("Delete this game?")) return;
 
   await fetch(`${API_URL}/api/delete-run`, {
     method: "POST",
