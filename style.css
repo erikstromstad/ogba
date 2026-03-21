@@ -44,7 +44,7 @@ a {
   position: relative;
   height: 320px;
 
-  background: url("hero-ogba.jpg") center no-repeat;
+  background: url("hero-ogba.png") center no-repeat;
   background-size: contain;   /* 🔥 THIS FIXES CROPPING */
   background-color: #000;
 
