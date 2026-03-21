@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Upcoming OGBA Pickup Games</title>
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
-
-</div>
 <body>
-  
-  <div class="navbar">
+
+<div class="navbar">
   <a href="/">OGBA</a>
   <a href="/runs">Runs</a>
 </div>
-  
- <div id="login" class="container center">
+
+<!-- LOGIN SCREEN -->
+<div id="login" class="container center">
   <h2>Enter Password</h2>
   <input type="password" id="password" placeholder="Password" />
   <br/>
@@ -23,6 +22,7 @@
   <p id="error" style="color:red;"></p>
 </div>
 
+<!-- PROTECTED CONTENT -->
 <div id="content" style="display:none;">
   <div class="container">
     <h1>Upcoming OGBA Pickup Games</h1>
@@ -32,7 +32,9 @@
 
 <script>
 const PASSWORD = "hoops4life";
+const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
+/* ===== LOGIN ===== */
 function checkPassword() {
   const input = document.getElementById("password").value;
 
@@ -40,108 +42,98 @@ function checkPassword() {
     document.getElementById("login").style.display = "none";
     document.getElementById("content").style.display = "block";
 
-    loadRuns(); // 🔥 loads runs AFTER login
+    loadRuns(); // ✅ only load AFTER login
   } else {
     document.getElementById("error").innerText = "Wrong password";
   }
 }
-  
-  if (localStorage.getItem("auth") !== "true") {
-    window.location.href = "/";
-  }
 
-  const API_URL = "https://ogba-api.erikstromstad.workers.dev";
+/* ===== LOAD RUNS ===== */
+async function loadRuns() {
+  const res = await fetch(`${API_URL}/api/runs`);
+  const runs = await res.json();
 
-  async function loadRuns() {
-    const res = await fetch(`${API_URL}/api/runs`);
-    const runs = await res.json();
+  const container = document.getElementById("runs");
+  container.innerHTML = "";
 
-    const container = document.getElementById("runs");
-    container.innerHTML = "";
+  runs.forEach(run => {
+    const div = document.createElement("div");
+    div.className = "card";
 
-runs.forEach(run => {
-  const div = document.createElement("div");
-div.className = "card";
+    const [datePart, timePart] = run.start_time.split("T");
+    const [year, month, day] = datePart.split("-");
+    const [hour, minute] = timePart.split(":");
 
-const [datePart, timePart] = run.start_time.split("T");
+    const dateObj = new Date(year, month - 1, day, hour, minute);
 
-const [year, month, day] = datePart.split("-");
-const [hour, minute] = timePart.split(":");
-
-// Create a date object WITHOUT timezone conversion issues
-const dateObj = new Date(year, month - 1, day, hour, minute);
-
-// Format date
-const formattedDate = dateObj.toLocaleDateString("en-US", {
-  weekday: "long",
-  month: "numeric",
-  day: "numeric",
-  year: "numeric"
-});
-
-// Format time (12-hour)
-const formattedTime = dateObj.toLocaleTimeString("en-US", {
-  hour: "numeric",
-  minute: "2-digit"
-});
-
-  div.innerHTML = `
-    <h3>${formattedDate} at ${formattedTime}</h3>
-    <p>${run.location_name}</p>
-    <p><em>${run.notes || ""}</em></p>
-    <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
-
-    <input placeholder="Your name" id="name-${run.id}" />
-    <input placeholder="Your email" id="email-${run.id}" />
-    <button onclick="joinRun(${run.id})">I'm In</button>
-    <button onclick="leaveRun(${run.id})">Cancel</button>
-
-    <div id="players-${run.id}">Loading players...</div>
-
-    <hr />
-  `;
-
-  container.appendChild(div);
-
-  loadPlayers(run.id);
-});
-  }
-
-  async function joinRun(id) {
-    const name = document.getElementById(`name-${id}`).value;
-    const email = document.getElementById(`email-${id}`).value;
-
-    if (!name || !email) {
-      alert("Enter name and email");
-      return;
-    }
-
-    const res = await fetch(`${API_URL}/api/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        run_id: id,
-        name,
-        email
-      })
+    const formattedDate = dateObj.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "numeric",
+      day: "numeric",
+      year: "numeric"
     });
 
-    const data = await res.json();
+    const formattedTime = dateObj.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit"
+    });
 
-    alert(
-      data.status === "confirmed"
-        ? "You're in ✅"
-        : "Run is full — added to waitlist 🕒"
-    );
+    div.innerHTML = `
+      <h3>${formattedDate} at ${formattedTime}</h3>
+      <p>${run.location_name}</p>
+      <p><em>${run.notes || ""}</em></p>
+      <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
 
-    loadRuns();
+      <input placeholder="Your name" id="name-${run.id}" />
+      <input placeholder="Your email" id="email-${run.id}" />
+
+      <button onclick="joinRun(${run.id})">I'm In</button>
+      <button onclick="leaveRun(${run.id})">Cancel</button>
+
+      <div id="players-${run.id}">Loading players...</div>
+    `;
+
+    container.appendChild(div);
+
+    loadPlayers(run.id);
+  });
+}
+
+/* ===== SIGNUP ===== */
+async function joinRun(id) {
+  const name = document.getElementById(`name-${id}`).value;
+  const email = document.getElementById(`email-${id}`).value;
+
+  if (!name || !email) {
+    alert("Enter name and email");
+    return;
   }
 
-  loadRuns();
+  const res = await fetch(`${API_URL}/api/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      run_id: id,
+      name,
+      email
+    })
+  });
 
-  async function loadPlayers(runId) {
+  const data = await res.json();
+
+  alert(
+    data.status === "confirmed"
+      ? "You're in ✅"
+      : "Run is full — added to waitlist 🕒"
+  );
+
+  loadRuns();
+}
+
+/* ===== LOAD PLAYERS ===== */
+async function loadPlayers(runId) {
   const res = await fetch(`${API_URL}/api/players?run_id=${runId}`);
   const players = await res.json();
 
@@ -152,6 +144,7 @@ const formattedTime = dateObj.toLocaleTimeString("en-US", {
   document.getElementById(`players-${runId}`).innerHTML = `<ul>${list}</ul>`;
 }
 
+/* ===== CANCEL ===== */
 async function leaveRun(id) {
   const email = document.getElementById(`email-${id}`).value;
 
@@ -173,7 +166,9 @@ async function leaveRun(id) {
 
   alert("Removed from run");
 
+  loadRuns(); // refresh
 }
 </script>
+
 </body>
 </html>
