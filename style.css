@@ -28,6 +28,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  flex-wrap: nowrap; /* 🔥 prevents second line */
 }
 
 /* Logo */
@@ -58,21 +60,37 @@ a {
   height: 40px;
 }
 
-/* Hide hamburger on desktop */
 .menu-toggle {
-  display: none;
   font-size: 28px;
   cursor: pointer;
+  display: block; /* 🔥 always visible */
 }
 
 /* Desktop nav links */
 .nav-links {
-  display: flex;
-  gap: 20px;
+  display: none; /* 🔥 always hidden until clicked */
+  flex-direction: column;
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px 0;
+  min-width: 150px;
+  z-index: 1000;
 }
 
 .nav-links a {
   font-weight: bold;
+}
+.nav-links.active {
+  display: flex;
+}
+.nav-links a {
+  padding: 12px 20px;
+  display: block;
+  white-space: nowrap;
 }
 
 /* ===== Mobile Styles ===== */
@@ -102,10 +120,6 @@ a {
     display: flex;
   }
 
-  /* Keep navbar row layout */
-  .navbar {
-    flex-wrap: wrap;
-  }
 }
 
 /* ===== Hero ===== */
