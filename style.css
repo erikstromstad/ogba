@@ -179,3 +179,49 @@ button:hover {
     height: 220px;
   }
 }
+/* ===== Admin Layout ===== */
+
+/* Form sizing (top section) */
+.admin-form {
+  max-width: 500px;
+  margin-bottom: 30px;
+}
+
+.admin-form input,
+.admin-form button {
+  width: 100%;
+}
+
+/* Grid for existing games */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Player list inside cards */
+.player-list {
+  margin-top: 10px;
+  padding-left: 15px;
+}
+
+.player-list li {
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Small delete button */
+.delete-player {
+  background: #444;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-player:hover {
+  background: #666;
+}
