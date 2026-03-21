@@ -15,12 +15,37 @@
   <a href="/runs">Runs</a>
 </div>
   
-  <div class="container">
-  <h1>Upcoming OGBA Pickup Basketball Games</h1>
+ <div id="login" class="container center">
+  <h2>Enter Password</h2>
+  <input type="password" id="password" placeholder="Password" />
+  <br/>
+  <button onclick="checkPassword()">Enter</button>
+  <p id="error" style="color:red;"></p>
+</div>
 
-  <div id="runs"></div>
+<div id="content" style="display:none;">
+  <div class="container">
+    <h1>Upcoming OGBA Pickup Games</h1>
+    <div id="runs"></div>
+  </div>
+</div>
 
 <script>
+const PASSWORD = "hoops4life";
+
+function checkPassword() {
+  const input = document.getElementById("password").value;
+
+  if (input === PASSWORD) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("content").style.display = "block";
+
+    loadRuns(); // 🔥 loads runs AFTER login
+  } else {
+    document.getElementById("error").innerText = "Wrong password";
+  }
+}
+  
   if (localStorage.getItem("auth") !== "true") {
     window.location.href = "/";
   }
@@ -148,7 +173,6 @@ async function leaveRun(id) {
 
   alert("Removed from run");
 
-  loadRuns();
 }
 </script>
 </body>
