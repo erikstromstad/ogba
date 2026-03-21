@@ -33,7 +33,7 @@ a {
 .hero {
   position: relative;
   height: 300px;
-  background: url("hero-ogba.jpg") center/cover no-repeat;
+  background: url("hero-ogba.png") center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
