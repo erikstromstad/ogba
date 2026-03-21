@@ -4,7 +4,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #000;
   color: #fff;
-  font-size: 16px; /* base size */
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -19,7 +19,7 @@ a {
   padding: 20px;
 }
 
-/* ===== Navbar Layout ===== */
+/* ===== Navbar ===== */
 .navbar {
   background-color: #111;
   padding: 10px 20px;
@@ -29,7 +29,8 @@ a {
   align-items: center;
   justify-content: space-between;
 
-  flex-wrap: nowrap; /* 🔥 prevents second line */
+  flex-wrap: nowrap; /* 🔥 keeps logo + menu on ONE line */
+  position: relative;
 }
 
 /* Logo */
@@ -37,89 +38,42 @@ a {
   height: 40px;
 }
 
-/* Nav links */
-.nav-links a {
-  margin-left: 20px;
-  font-weight: bold;
-  padding: 10px 12px;
-  display: inline-block;
-}
-
-/* ===== Navbar (Desktop Default) ===== */
-.navbar {
-  background-color: #111;
-  padding: 10px 20px;
-  border-bottom: 1px solid #333;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo img {
-  height: 40px;
-}
-
+/* Hamburger */
 .menu-toggle {
   font-size: 28px;
   cursor: pointer;
-  display: block; /* 🔥 always visible */
 }
 
-/* Desktop nav links */
+/* Dropdown menu */
 .nav-links {
-  display: none; /* 🔥 always hidden until clicked */
+  display: none;
   flex-direction: column;
+
   position: absolute;
   top: 60px;
   right: 20px;
+
   background: #111;
   border: 1px solid #333;
   border-radius: 8px;
+
   padding: 10px 0;
   min-width: 150px;
+
   z-index: 1000;
 }
 
-.nav-links a {
-  font-weight: bold;
-}
+/* Show menu when active */
 .nav-links.active {
   display: flex;
 }
+
+/* Menu links */
 .nav-links a {
   padding: 12px 20px;
   display: block;
   white-space: nowrap;
-}
-
-/* ===== Mobile Styles ===== */
-@media (max-width: 600px) {
-
-  .menu-toggle {
-    display: block; /* show hamburger */
-  }
-
-  .nav-links {
-    display: none; /* hidden by default */
-    flex-direction: column;
-    width: 100%;
-    background: #111;
-    margin-top: 10px;
-    padding: 10px 0;
-    border-top: 1px solid #333;
-  }
-
-  .nav-links a {
-    padding: 12px 20px;
-    display: block;
-  }
-
-  /* When active (clicked) */
-  .nav-links.active {
-    display: flex;
-  }
-
+  font-weight: bold;
 }
 
 /* ===== Hero ===== */
@@ -128,17 +82,12 @@ a {
   height: 320px;
 
   background: url("hero-ogba.png") center no-repeat;
-  background-size: contain;   /* 🔥 THIS FIXES CROPPING */
+  background-size: contain;
   background-color: #000;
 
   display: flex;
   align-items: center;
   justify-content: center;
-}
-@media (max-width: 600px) {
-  .hero {
-    height: 220px;
-  }
 }
 
 .hero-overlay {
@@ -198,45 +147,27 @@ button:hover {
 @media (max-width: 600px) {
 
   /* Bigger headings */
-  h1 {
-    font-size: 24px;
-  }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
 
-  h2 {
-    font-size: 20px;
-  }
-
-  h3 {
-    font-size: 18px;
-  }
-
-  /* Stack navbar better */
+  /* Keep navbar ONE ROW (fixes your issue) */
   .navbar {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
   }
 
-  .nav-links {
-    margin-top: 10px;
+  /* Slightly tighter spacing */
+  .container {
+    padding: 15px;
   }
 
-  .nav-links a {
-    display: block;
-    margin: 5px 0;
-  }
-
-  /* Inputs full width */
-  input {
-    width: 100%;
-  }
-
-  /* Add spacing between buttons */
+  /* Buttons spacing */
   button {
     margin-bottom: 10px;
   }
 
-  /* Reduce container padding slightly */
-  .container {
-    padding: 15px;
+  /* Hero smaller */
+  .hero {
+    height: 220px;
   }
 }
