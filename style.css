@@ -103,6 +103,14 @@ a {
   text-align: center;
 }
 
+/* ===== Small Hero (About/Register pages) ===== */
+.hero-small {
+  height: 120px;
+  background: url("hero-ogba.png") center no-repeat;
+  background-size: contain;
+  margin-bottom: 20px;
+}
+
 /* ===== Cards ===== */
 .card {
   background: #111;
