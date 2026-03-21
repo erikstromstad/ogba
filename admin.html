@@ -4,7 +4,14 @@
   <meta charset="UTF-8">
   <title>Admin - Add pickup game</title>
 </head>
-<body>
+<link rel="stylesheet" href="style.css">
+
+<div class="navbar">
+  <a href="/">OGBA</a>
+  <a href="/runs">Runs</a>
+</div>
+  
+  <body>
 
   <h1>Admin - Add pickup game</h1>
 
@@ -98,7 +105,8 @@
       container.innerHTML = "";
 
       runs.forEach(run => {
-        const div = document.createElement("div");
+       const div = document.createElement("div");
+        div.className = "card";
 
         // ✅ NO Date() conversion
         const date = run.start_time.slice(0,16);
