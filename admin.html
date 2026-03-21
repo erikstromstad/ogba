@@ -4,8 +4,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>Admin - Add pickup game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<link rel="stylesheet" href="style.css">
+
+<body>
 
 <div class="navbar">
   <a href="/" class="logo">
@@ -21,8 +23,8 @@
     <a href="/admin.html">Admin</a>
   </div>
 </div>
-  
-  <body>
+
+<div class="container">
 
   <h1>Admin - Add pickup game</h1>
 
@@ -34,159 +36,206 @@
 
   <div id="admin" style="display:none;">
 
-    <h2>Pickup game</h2>
+    <!-- ===== FORM ===== -->
+    <div class="admin-form">
 
-    <label>Date & Time:</label><br/>
-    <input type="datetime-local" id="datetime" /><br/><br/>
+      <h2>Pickup game</h2>
 
-    <label>Location Name:</label><br/>
-    <input type="text" id="location" placeholder="Gym" /><br/><br/>
+      <label>Date & Time:</label><br/>
+      <input type="datetime-local" id="datetime" /><br/><br/>
 
-    <label>Max Players:</label><br/>
-    <input type="number" id="max" value="20" /><br/><br/>
+      <label>Location Name:</label><br/>
+      <input type="text" id="location" placeholder="Gym" /><br/><br/>
 
-    <label>Notes:</label><br/>
-    <input type="text" id="notes" placeholder="Doors open at 6:30" /><br/><br/>
+      <label>Max Players:</label><br/>
+      <input type="number" id="max" value="20" /><br/><br/>
 
-    <button onclick="createRun()">Add to schedule</button>
+      <label>Notes:</label><br/>
+      <input type="text" id="notes" placeholder="Doors open at 6:30" /><br/><br/>
 
-    <p id="message"></p>
+      <button onclick="createRun()">Add to schedule</button>
 
+      <p id="message"></p>
+
+    </div>
+
+    <!-- ===== EXISTING RUNS ===== -->
     <h2>Existing Games</h2>
-    <div id="runs"></div>
+    <div id="runs" class="admin-grid"></div>
 
   </div>
 
-  <script>
-    function toggleMenu() {
+</div>
+
+<script>
+function toggleMenu() {
   const nav = document.getElementById("navLinks");
   nav.classList.toggle("active");
 }
-    const PASSWORD = "Adrian";
-    const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
-    function checkPassword() {
-      const input = document.getElementById("password").value;
+const PASSWORD = "Adrian";
+const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
-      if (input === PASSWORD) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("admin").style.display = "block";
+function checkPassword() {
+  const input = document.getElementById("password").value;
 
-        loadRuns(); 
-      } else {
-        document.getElementById("error").innerText = "Wrong password";
-      }
-    }
+  if (input === PASSWORD) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("admin").style.display = "block";
 
-    async function createRun() {
-      const datetime = document.getElementById("datetime").value; // ✅ NO conversion
-      const location = document.getElementById("location").value;
-      const max = document.getElementById("max").value;
-      const notes = document.getElementById("notes").value;
+    loadRuns();
+  } else {
+    document.getElementById("error").innerText = "Wrong password";
+  }
+}
 
-      if (!datetime || !location) {
-        alert("Fill out all fields");
-        return;
-      }
+async function createRun() {
+  const datetime = document.getElementById("datetime").value;
+  const location = document.getElementById("location").value;
+  const max = document.getElementById("max").value;
+  const notes = document.getElementById("notes").value;
 
-      const res = await fetch(`${API_URL}/api/create-run`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          datetime,
-          location,
-          max_players: max,
-          notes
-        })
-      });
+  if (!datetime || !location) {
+    alert("Fill out all fields");
+    return;
+  }
 
-      const data = await res.json();
+  const res = await fetch(`${API_URL}/api/create-run`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      datetime,
+      location,
+      max_players: max,
+      notes
+    })
+  });
 
-      if (data.success) {
-        document.getElementById("message").innerText = "Game created!";
-        loadRuns();
-      } else {
-        document.getElementById("message").innerText = "Error creating game";
-      }
-    }
+  const data = await res.json();
 
-    async function loadRuns() {
-      const res = await fetch(`${API_URL}/api/runs`);
-      const runs = await res.json();
+  if (data.success) {
+    document.getElementById("message").innerText = "Game created!";
+    loadRuns();
+  } else {
+    document.getElementById("message").innerText = "Error creating game";
+  }
+}
 
-      const container = document.getElementById("runs");
-      container.innerHTML = "";
+async function loadRuns() {
+  const res = await fetch(`${API_URL}/api/runs`);
+  const runs = await res.json();
 
-      runs.forEach(run => {
-       const div = document.createElement("div");
-        div.className = "card";
+  const container = document.getElementById("runs");
+  container.innerHTML = "";
 
-        // ✅ NO Date() conversion
-        const date = run.start_time.slice(0,16);
+  runs.forEach(run => {
+    const div = document.createElement("div");
+    div.className = "card";
 
-        div.innerHTML = `
-          <input type="datetime-local" value="${date}" id="date-${run.id}" />
-          <input value="${run.location_name}" id="loc-${run.id}" />
-          <input type="number" value="${run.max_players}" id="max-${run.id}" />
-          <input value="${run.notes || ""}" placeholder="Notes" id="notes-${run.id}" />
+    const date = run.start_time.slice(0,16);
 
-          <button onclick="updateRun(${run.id})">Save</button>
-          <button onclick="deleteRun(${run.id})">Delete</button>
+    div.innerHTML = `
+      <strong>${run.location_name}</strong><br/>
+      <small>${run.start_time}</small><br/><br/>
 
-          <hr/>
-        `;
+      <input type="datetime-local" value="${date}" id="date-${run.id}" />
+      <input value="${run.location_name}" id="loc-${run.id}" />
+      <input type="number" value="${run.max_players}" id="max-${run.id}" />
+      <input value="${run.notes || ""}" placeholder="Notes" id="notes-${run.id}" />
 
-        container.appendChild(div);
-      });
-    }
+      <button onclick="updateRun(${run.id})">Save</button>
+      <button onclick="deleteRun(${run.id})">Delete Game</button>
 
-    async function updateRun(id) {
-      const datetime = document.getElementById(`date-${id}`).value; // ✅ NO conversion
-      const location = document.getElementById(`loc-${id}`).value;
-      const max = document.getElementById(`max-${id}`).value;
-      const notes = document.getElementById(`notes-${id}`).value;
+      <h4>Players</h4>
+      <ul id="players-${run.id}" class="player-list">Loading...</ul>
+    `;
 
-      const res = await fetch(`${API_URL}/api/update-run`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          datetime,
-          location,
-          max_players: max,
-          notes
-        })
-      });
+    container.appendChild(div);
 
-      const data = await res.json();
+    loadPlayersAdmin(run.id);
+  });
+}
 
-      if (data.success) {
-        alert("Updated");
-      } else {
-        alert("Error updating");
-      }
-    }
+async function loadPlayersAdmin(runId) {
+  const res = await fetch(`${API_URL}/api/players?run_id=${runId}`);
+  const players = await res.json();
 
-    async function deleteRun(id) {
-      if (!confirm("Delete this game?")) return;
+  const list = players.map(p => {
+    return `
+      <li>
+        ${p.name} (${p.status})
+        <button class="delete-player" onclick="removePlayer(${runId}, '${p.email}')">X</button>
+      </li>
+    `;
+  }).join("");
 
-      const res = await fetch(`${API_URL}/api/delete-run`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
-      });
+  document.getElementById(`players-${runId}`).innerHTML = list || "<li>No players</li>";
+}
 
-      const data = await res.json();
+async function removePlayer(runId, email) {
+  if (!confirm("Remove this player?")) return;
 
-      if (data.success) {
-        loadRuns();
-      } else {
-        alert("Error deleting");
-      }
-    }
-  </script>
+  await fetch(`${API_URL}/api/cancel`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      run_id: runId,
+      email
+    })
+  });
+
+  loadRuns();
+}
+
+async function updateRun(id) {
+  const datetime = document.getElementById(`date-${id}`).value;
+  const location = document.getElementById(`loc-${id}`).value;
+  const max = document.getElementById(`max-${id}`).value;
+  const notes = document.getElementById(`notes-${id}`).value;
+
+  const res = await fetch(`${API_URL}/api/update-run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id,
+      datetime,
+      location,
+      max_players: max,
+      notes
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert("Updated");
+  } else {
+    alert("Error updating");
+  }
+}
+
+async function deleteRun(id) {
+  if (!confirm("Delete this game?")) return;
+
+  const res = await fetch(`${API_URL}/api/delete-run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    loadRuns();
+  } else {
+    alert("Error deleting");
+  }
+}
+</script>
 
 </body>
 </html>
