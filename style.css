@@ -350,3 +350,14 @@ button:hover {
     font-size: 14px;
   }
 }
+
+/* Fix lists to be left-aligned */
+ul, ol {
+  text-align: left;
+  display: inline-block; /* keeps it centered as a block */
+  margin: 20px auto;
+  padding-left: 20px;
+}
+li {
+  margin-bottom: 8px;
+}
