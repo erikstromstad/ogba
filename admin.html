@@ -3,12 +3,13 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>Admin - Add pickup game</title>
+  <title>Admin - OGBA</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- ===== NAVBAR ===== -->
 <div class="navbar">
   <a href="/" class="logo">
     <img src="OGBA-logo.png" alt="OGBA Logo" />
@@ -28,17 +29,18 @@
 
   <h1>Admin - Add pickup game</h1>
 
+  <!-- ===== LOGIN ===== -->
   <div id="login">
     <input type="password" id="password" placeholder="Password" />
     <button onclick="checkPassword()">Enter</button>
     <p id="error" style="color:red;"></p>
   </div>
 
+  <!-- ===== ADMIN CONTENT ===== -->
   <div id="admin" style="display:none;">
 
-    <!-- ===== FORM ===== -->
+    <!-- ===== CREATE RUN ===== -->
     <div class="admin-form">
-
       <h2>Pickup game</h2>
 
       <label>Date & Time:</label><br/>
@@ -56,7 +58,6 @@
       <button onclick="createRun()">Add to schedule</button>
 
       <p id="message"></p>
-
     </div>
 
     <!-- ===== EXISTING RUNS ===== -->
@@ -68,27 +69,30 @@
 </div>
 
 <script>
+/* ===== NAV TOGGLE ===== */
 function toggleMenu() {
   const nav = document.getElementById("navLinks");
   nav.classList.toggle("active");
 }
 
+/* ===== CONFIG ===== */
 const PASSWORD = "Adrian";
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
+/* ===== LOGIN ===== */
 function checkPassword() {
   const input = document.getElementById("password").value;
 
   if (input === PASSWORD) {
     document.getElementById("login").style.display = "none";
     document.getElementById("admin").style.display = "block";
-
     loadRuns();
   } else {
     document.getElementById("error").innerText = "Wrong password";
   }
 }
 
+/* ===== CREATE RUN ===== */
 async function createRun() {
   const datetime = document.getElementById("datetime").value;
   const location = document.getElementById("location").value;
@@ -123,6 +127,31 @@ async function createRun() {
   }
 }
 
+/* ===== FORMAT DATE (NO TIMEZONE BUG) ===== */
+function formatDateTime(dateString) {
+  const [datePart, timePart] = dateString.split("T");
+
+  const [year, month, day] = datePart.split("-");
+  const [hour, minute] = timePart.split(":");
+
+  const dateObj = new Date(year, month - 1, day, hour, minute);
+
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "numeric",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  const formattedTime = dateObj.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+
+  return `${formattedDate} at ${formattedTime}`;
+}
+
+/* ===== LOAD RUNS ===== */
 async function loadRuns() {
   const res = await fetch(`${API_URL}/api/runs`);
   const runs = await res.json();
@@ -138,7 +167,7 @@ async function loadRuns() {
 
     div.innerHTML = `
       <strong>${run.location_name}</strong><br/>
-      <small>${run.start_time}</small><br/><br/>
+      <small>${formatDateTime(run.start_time)}</small><br/><br/>
 
       <input type="datetime-local" value="${date}" id="date-${run.id}" />
       <input value="${run.location_name}" id="loc-${run.id}" />
@@ -158,6 +187,7 @@ async function loadRuns() {
   });
 }
 
+/* ===== LOAD PLAYERS ===== */
 async function loadPlayersAdmin(runId) {
   const res = await fetch(`${API_URL}/api/players?run_id=${runId}`);
   const players = await res.json();
@@ -166,7 +196,7 @@ async function loadPlayersAdmin(runId) {
     return `
       <li>
         ${p.name} (${p.status})
-        <button class="delete-player" onclick="removePlayer(${runId}, '${p.email}')">X</button>
+        <button class="delete-player" onclick="removePlayer(${runId}, '${p.email}')">Remove</button>
       </li>
     `;
   }).join("");
@@ -174,23 +204,31 @@ async function loadPlayersAdmin(runId) {
   document.getElementById(`players-${runId}`).innerHTML = list || "<li>No players</li>";
 }
 
+/* ===== REMOVE PLAYER ===== */
 async function removePlayer(runId, email) {
   if (!confirm("Remove this player?")) return;
 
-  await fetch(`${API_URL}/api/cancel`, {
+  const res = await fetch(`${API_URL}/api/cancel`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
       run_id: runId,
-      email
+      email: email
     })
   });
 
-  loadRuns();
+  const data = await res.json();
+
+  if (data.success) {
+    loadRuns();
+  } else {
+    alert("Error removing player");
+  }
 }
 
+/* ===== UPDATE RUN ===== */
 async function updateRun(id) {
   const datetime = document.getElementById(`date-${id}`).value;
   const location = document.getElementById(`loc-${id}`).value;
@@ -218,6 +256,7 @@ async function updateRun(id) {
   }
 }
 
+/* ===== DELETE RUN ===== */
 async function deleteRun(id) {
   if (!confirm("Delete this game?")) return;
 
