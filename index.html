@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
-  <head>
+<head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>OGBA Pickup Basketball</title>
+  <title>OGBA</title>
   <link rel="stylesheet" href="style.css">
+</head>
 
+<body>
+
+<!-- ===== NAVBAR ===== -->
 <div class="navbar">
   <a href="/" class="logo">
     <img src="OGBA-logo.png" alt="OGBA Logo" />
@@ -21,40 +24,40 @@
     <a href="/admin.html">Admin</a>
   </div>
 </div>
-    
-<div class="hero">
+
+<!-- ===== HERO VIDEO ===== -->
+<div class="hero-video">
+
+  <!-- Background Video -->
+  <video autoplay muted loop playsinline class="hero-video-bg">
+    <source src="hero-video.mp4" type="video/mp4">
+  </video>
+
+  <!-- Dark overlay -->
   <div class="hero-overlay"></div>
-  <div class="hero-text">
-   
+
+  <!-- Content -->
+  <div class="hero-content">
+    
+    <!-- Smaller logo overlay -->
+    <img src="hero-ogba.png" class="hero-logo" alt="OGBA" />
+
+    <div class="hero-buttons">
+      <a href="/about.html" class="btn">About</a>
+      <a href="/runs.html" class="btn">Games</a>
+      <a href="/register.html" class="btn">Register</a>
+    </div>
+
   </div>
+
 </div>
 
-<div class="container center">
-  <h2>Pickup Basketball. No BS.</h2>
-  <p>Check upcoming games and lock in your spot.</p>
-
-  <a href="/runs">
-    <button>View Games</button>
-  </a>
-</div>
-
-  <script>
-   function toggleMenu() {
+<script>
+function toggleMenu() {
   const nav = document.getElementById("navLinks");
   nav.classList.toggle("active");
 }
-    const PASSWORD = "hoops4life";
+</script>
 
-    function checkPassword() {
-      const input = document.getElementById("password").value;
-
-      if (input === PASSWORD) {
-        localStorage.setItem("auth", "true");
-        window.location.href = "/runs.html";
-      } else {
-        document.getElementById("error").innerText = "Wrong password";
-      }
-    }
-  </script>
 </body>
 </html>
