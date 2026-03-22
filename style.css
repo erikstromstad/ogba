@@ -214,14 +214,15 @@ button:hover {
 
 /* Small delete button */
 .delete-player {
-  background: #444;
-  color: #fff;
-  padding: 4px 8px;
+  background: #fff;
+  color: #000;
+  padding: 6px 10px;
   font-size: 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 .delete-player:hover {
-  background: #666;
+  background: #ccc;
 }
