@@ -195,8 +195,14 @@ async function loadPlayersAdmin(runId) {
   const list = players.map(p => {
     return `
       <li>
-        ${p.name} (${p.status})
-        <button class="delete-player" onclick="removePlayer(${runId}, '${p.email}')">Remove</button>
+        ${p.name} (${p.status}) 
+<select onchange="updatePayment(${p.reg_id}, this.value)">
+  <option value="unpaid" ${p.payment_status === "unpaid" ? "selected" : ""}>Unpaid</option>
+  <option value="paid" ${p.payment_status === "paid" ? "selected" : ""}>Paid</option>
+</select>
+
+<button class="delete-player" onclick="removePlayer(${runId}, '${p.email}')">Remove</button>
+  
       </li>
     `;
   }).join("");
@@ -273,6 +279,19 @@ async function deleteRun(id) {
   } else {
     alert("Error deleting");
   }
+}
+  /* ===== Update Payment ===== */
+  async function updatePayment(regId, status) {
+  await fetch(`${API_URL}/api/update-payment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      reg_id: regId,
+      payment_status: status
+    })
+  });
 }
 </script>
 
