@@ -246,6 +246,15 @@ button:hover {
   z-index: 0;
 }
 
+/* Show desktop video by default */
+.desktop-video {
+  display: block;
+}
+
+.mobile-video {
+  display: none;
+}
+
 /* Hero content centered */
 .hero-content {
   position: relative;
@@ -303,10 +312,18 @@ button:hover {
     height: 70vh;
   }
 
-  /* 🔥 KEY FIX: reduce zoom/cropping */
+  /* 🔥 Switch videos */
+  .desktop-video {
+    display: none;
+  }
+
+  .mobile-video {
+    display: block;
+  }
+
+  /* Mobile video fills properly */
   .hero-video-bg {
-    object-fit: contain;   /* instead of cover */
-    background-color: #000; /* fills empty space */
+    object-fit: cover; /* back to cover since it's vertical now */
   }
 
   /* Logo matches button width */
