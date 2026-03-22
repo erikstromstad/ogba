@@ -234,15 +234,13 @@ button:hover {
   overflow: hidden;
 }
 
-/* Video fills background */
+/* Video background */
 .hero-video-bg {
   position: absolute;
   top: 50%;
   left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
   transform: translate(-50%, -50%);
   object-fit: cover;
   z-index: 0;
@@ -263,10 +261,10 @@ button:hover {
   padding: 20px;
 }
 
-/* Smaller hero logo */
+/* ===== DESKTOP LOGO (match buttons width) ===== */
 .hero-logo {
-  width: 200px;
-  max-width: 60%;
+  width: 360px;           /* 🔥 controls desktop size */
+  max-width: 80%;
   margin-bottom: 20px;
 }
 
@@ -290,7 +288,7 @@ button:hover {
   border-radius: 8px;
   font-weight: bold;
   text-decoration: none;
-  min-width: 100px;
+  min-width: 110px;
   text-align: center;
 }
 
@@ -305,20 +303,33 @@ button:hover {
     height: 70vh;
   }
 
+  /* 🔥 KEY FIX: reduce zoom/cropping */
+  .hero-video-bg {
+    object-fit: contain;   /* instead of cover */
+    background-color: #000; /* fills empty space */
+  }
+
+  /* Logo matches button width */
   .hero-logo {
-    width: 140px;
+    width: 90%;
+    max-width: 280px;
   }
 
   .hero-content h1 {
     font-size: 22px;
   }
 
+  /* Stack buttons */
   .hero-buttons {
     flex-direction: column;
-    width: 100%;
+    width: 90%;
+    gap: 10px;
   }
 
+  /* Smaller buttons */
   .btn {
     width: 100%;
+    padding: 10px;
+    font-size: 14px;
   }
 }
