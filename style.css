@@ -14,7 +14,7 @@ a {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1100px; /* 🔥 allows tiling */
   margin: 0 auto;
   padding: 20px;
 }
@@ -29,22 +29,18 @@ a {
   align-items: center;
   justify-content: space-between;
 
-  flex-wrap: nowrap; /* 🔥 keeps logo + menu on ONE line */
   position: relative;
 }
 
-/* Logo */
 .logo img {
   height: 40px;
 }
 
-/* Hamburger */
 .menu-toggle {
   font-size: 28px;
   cursor: pointer;
 }
 
-/* Dropdown menu */
 .nav-links {
   display: none;
   flex-direction: column;
@@ -59,78 +55,41 @@ a {
 
   padding: 10px 0;
   min-width: 150px;
-
-  z-index: 1000;
 }
 
-/* Show menu when active */
 .nav-links.active {
   display: flex;
 }
 
-/* Menu links */
 .nav-links a {
   padding: 12px 20px;
-  display: block;
-  white-space: nowrap;
   font-weight: bold;
-}
-
-/* ===== Hero ===== */
-.hero {
-  position: relative;
-  height: 320px;
-
-  background: url("hero-ogba.png") center no-repeat;
-  background-size: contain;
-  background-color: #000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-}
-
-.hero-text {
-  position: relative;
-  font-size: 36px;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* ===== Small Hero (About/Register pages) ===== */
-.hero-small {
-  height: 120px;
-  background: url("hero-ogba.png") center no-repeat;
-  background-size: contain;
-  margin-bottom: 20px;
 }
 
 /* ===== Cards ===== */
 .card {
   background: #111;
   border: 1px solid #333;
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 16px;
   border-radius: 10px;
 }
 
 /* ===== Inputs ===== */
-input, button {
-  padding: 12px;
-  font-size: 16px;
+input,
+select,
+button {
+  padding: 10px;
+  font-size: 14px;
   border-radius: 6px;
+  border: 1px solid #333;
 }
 
-input {
+input,
+select {
   width: 100%;
   background: #222;
   color: #fff;
+  box-sizing: border-box;
 }
 
 button {
@@ -139,263 +98,109 @@ button {
   cursor: pointer;
   font-weight: bold;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 button:hover {
   background: #ccc;
 }
 
-/* ===== Utility ===== */
-.center {
-  text-align: center;
-}
-
-/* ===== Mobile ===== */
-@media (max-width: 600px) {
-
-  /* Bigger headings */
-  h1 { font-size: 24px; }
-  h2 { font-size: 20px; }
-  h3 { font-size: 18px; }
-
-  /* Keep navbar ONE ROW (fixes your issue) */
-  .navbar {
-    flex-direction: row;
-  }
-
-  /* Slightly tighter spacing */
-  .container {
-    padding: 15px;
-  }
-
-  /* Buttons spacing */
-  button {
-    margin-bottom: 10px;
-  }
-
-  /* Hero smaller */
-  .hero {
-    height: 220px;
-  }
-}
 /* ===== Admin Layout ===== */
 
-/* Form sizing (top section) */
 .admin-form {
-  max-width: 500px;
+  max-width: 400px;
   margin-bottom: 30px;
 }
 
 .admin-form input,
+.admin-form select,
 .admin-form button {
   width: 100%;
-  max-width: 400px;
-  box-sizing: border-box;
-.admin-form select {
-  width: 100%;
-  max-width: 400px;
   box-sizing: border-box;
 }
 
-/* Grid for existing games */
+/* 🔥 GRID FIX (this is the big one) */
 .admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr; /* mobile default */
   gap: 20px;
 }
 
-/* Player list inside cards */
+/* 2 columns */
+@media (min-width: 700px) {
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 3 columns */
+@media (min-width: 1100px) {
+  .admin-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Inputs inside cards */
+.card input,
+.card select {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+/* ===== Player List ===== */
 .player-list {
   margin-top: 10px;
-  padding-left: 15px;
+  padding-left: 0;
+  list-style: none;
 }
 
 .player-list li {
-  margin-bottom: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: 10px;
 }
 
-/* Small delete button */
+/* 🔥 controls row */
+.player-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.player-controls select,
+.player-controls button {
+  flex: 1;
+  width: 50%;
+  padding: 6px;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Remove button */
 .delete-player {
   background: #fff;
   color: #000;
-  padding: 6px 10px;
-  font-size: 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-left: 10px;
 }
 
 .delete-player:hover {
   background: #ccc;
 }
 
-/* ===== HERO VIDEO ===== */
-.hero-video {
-  position: relative;
-  height: 80vh;
-  overflow: hidden;
-}
-
-/* Video background */
-.hero-video-bg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
-  z-index: 0;
-}
-
-/* Show desktop video by default */
-.desktop-video {
-  display: block;
-}
-
-.mobile-video {
-  display: none;
-}
-
-/* Hero content centered */
-.hero-content {
-  position: relative;
-  z-index: 2;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  text-align: center;
-  padding: 20px;
-}
-
-/* ===== DESKTOP LOGO (match buttons width) ===== */
-.hero-logo {
-  width: 360px;           /* 🔥 controls desktop size */
-  max-width: 80%;
-  margin-bottom: 20px;
-}
-
-/* Title */
-.hero-content h1 {
-  font-size: 32px;
-  margin-bottom: 20px;
-}
-
-/* Buttons container */
-.hero-buttons {
-  display: flex;
-  gap: 15px;
-}
-
-/* Buttons */
-.btn {
-  background: #fff;
-  color: #000;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  text-decoration: none;
-  min-width: 110px;
-  text-align: center;
-}
-
-.btn:hover {
-  background: #ccc;
-}
-
-/* ===== MOBILE HERO ===== */
-@media (max-width: 600px) {
-
-  .hero-video {
-    height: 70vh;
-  }
-
-  /* 🔥 Switch videos */
-  .desktop-video {
-    display: none;
-  }
-
-  .mobile-video {
-    display: block;
-  }
-
-  /* Mobile video fills properly */
-  .hero-video-bg {
-    object-fit: cover; /* back to cover since it's vertical now */
-  }
-
-  /* Logo matches button width */
-  .hero-logo {
-    width: 90%;
-    max-width: 280px;
-  }
-
-  .hero-content h1 {
-    font-size: 22px;
-  }
-
-  /* Stack buttons */
-  .hero-buttons {
-    flex-direction: column;
-    width: 90%;
-    gap: 10px;
-  }
-
-  /* Smaller buttons */
-  .btn {
-    width: 100%;
-    padding: 10px;
-    font-size: 14px;
-  }
-}
-
-/* Fix lists to be left-aligned */
+/* ===== Lists ===== */
 ul, ol {
   text-align: left;
-  display: inline-block; /* keeps it centered as a block */
+  display: inline-block;
   margin: 20px auto;
   padding-left: 20px;
 }
-li {
-  margin-bottom: 8px;
-}
 
- /* Location selector button */
-select {
-  width: 100%;
-  background: #222;
-  color: #fff;
-  border: 1px solid #333;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 6px;
-}
+/* ===== Mobile ===== */
+@media (max-width: 600px) {
 
-.player-controls {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
+  .container {
+    padding: 15px;
+  }
 
-.player-controls select,
-.player-controls button {
-  flex: 1;          /* equal width */
-  width: auto;      /* override full width */
-  padding: 6px;
-  font-size: 14px;
-}
-
-.card input,
-.card select {
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 8px;
+  button {
+    margin-bottom: 8px;
+  }
 }
