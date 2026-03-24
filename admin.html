@@ -9,13 +9,12 @@
 
 <body>
 
+<!-- NAVBAR -->
 <div class="navbar">
   <a href="/" class="logo">
     <img src="OGBA-logo.png" />
   </a>
-
   <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
-
   <div class="nav-links" id="navLinks">
     <a href="/runs.html">Games</a>
     <a href="/about.html">About</a>
@@ -39,17 +38,16 @@
 <div class="admin-form">
   <h2>Create Game</h2>
 
-  <input type="datetime-local" id="datetime" step="900" /><br/><br/>
+  <input type="datetime-local" id="datetime" step="900"/>
 
   <select id="location">
-    <option value="">Select Location</option>
     <option value="Wilshire Elementary" data-map="https://maps.app.goo.gl/qzRVpF9vu4L8bQFR8">Wilshire Elementary</option>
     <option value="Saint Anthony Village High School" data-map="https://maps.app.goo.gl/1tma89XWjPa35eKbA">Saint Anthony Village High School</option>
     <option value="Edison Community Gym" data-map="https://maps.app.goo.gl/ZoRX994UeJi79KVj9">Edison Community Gym</option>
-  </select><br/><br/>
+  </select>
 
-  <input type="number" id="max" value="20" /><br/><br/>
-  <input type="text" id="notes" placeholder="Doors open at 6:30" /><br/><br/>
+  <input type="number" id="max" value="20"/>
+  <input type="text" id="notes" placeholder="Notes"/>
 
   <button onclick="createRun()">Add Game</button>
 </div>
@@ -64,12 +62,12 @@
 </div>
 
 <script>
+const PASSWORD = "Adrian";
+const API_URL = "https://ogba-api.erikstromstad.workers.dev";
+
 function toggleMenu() {
   document.getElementById("navLinks").classList.toggle("active");
 }
-
-const PASSWORD = "Adrian";
-const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
 function checkPassword() {
   if (document.getElementById("password").value === PASSWORD) {
@@ -79,92 +77,162 @@ function checkPassword() {
   }
 }
 
+// CREATE
 async function createRun() {
   const datetime = document.getElementById("datetime").value;
-  const locationSelect = document.getElementById("location");
-  const location = locationSelect.value;
-  const map_link = locationSelect.options[locationSelect.selectedIndex].dataset.map;
-
+  const select = document.getElementById("location");
+  const location = select.value;
+  const map_link = select.options[select.selectedIndex].dataset.map;
   const max = document.getElementById("max").value;
   const notes = document.getElementById("notes").value;
 
   await fetch(`${API_URL}/api/create-run`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      datetime,
-      location,
-      map_link,
-      max_players: max,
-      notes
-    })
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ datetime, location, map_link, max_players:max, notes })
   });
 
   loadRuns();
 }
 
+// FORMAT DATE (SAFE)
+function formatDate(dateString) {
+  const [d,t] = dateString.split("T");
+  const [y,m,day] = d.split("-");
+  const [h,min] = t.split(":");
+
+  const dt = new Date(y, m-1, day, h, min);
+
+  return dt.toLocaleDateString("en-US",{weekday:"long", month:"numeric", day:"numeric"}) +
+    " " +
+    dt.toLocaleTimeString("en-US",{hour:"numeric", minute:"2-digit"});
+}
+
+// LOAD RUNS
 async function loadRuns() {
   const res = await fetch(`${API_URL}/api/runs`);
   const runs = await res.json();
 
+  const upcoming = document.getElementById("upcoming");
+  const past = document.getElementById("past");
+
+  upcoming.innerHTML = "";
+  past.innerHTML = "";
+
   const today = new Date();
   today.setHours(0,0,0,0);
-
-  document.getElementById("upcoming").innerHTML = "";
-  document.getElementById("past").innerHTML = "";
 
   runs.forEach(run => {
     const runDate = new Date(run.start_time);
     runDate.setHours(0,0,0,0);
 
-    const container = runDate >= today
-      ? document.getElementById("upcoming")
-      : document.getElementById("past");
-
     const div = document.createElement("div");
     div.className = "card";
 
+    const dateVal = run.start_time.slice(0,16);
+
     div.innerHTML = `
       <strong>${run.location_name}</strong><br/>
-      <small>${new Date(run.start_time).toLocaleString()}</small><br/><br/>
+      <small>${formatDate(run.start_time)}</small><br/><br/>
 
-      <a href="${run.map_link}" target="_blank">View Map</a><br/><br/>
+      <input type="datetime-local" value="${dateVal}" id="date-${run.id}" />
 
-      <input type="datetime-local" value="${run.start_time.slice(0,16)}" id="date-${run.id}" />
-      <input value="${run.location_name}" id="loc-${run.id}" />
+      <select id="loc-${run.id}">
+        <option ${run.location_name==="Wilshire Elementary"?"selected":""}>Wilshire Elementary</option>
+        <option ${run.location_name==="Saint Anthony Village High School"?"selected":""}>Saint Anthony Village High School</option>
+        <option ${run.location_name==="Edison Community Gym"?"selected":""}>Edison Community Gym</option>
+      </select>
+
       <input type="number" value="${run.max_players}" id="max-${run.id}" />
-      <input value="${run.notes || ""}" id="notes-${run.id}" />
+      <input value="${run.notes||""}" id="notes-${run.id}" />
 
       <button onclick="updateRun(${run.id})">Save</button>
       <button onclick="deleteRun(${run.id})">Delete</button>
 
-      <ul id="players-${run.id}"></ul>
+      <h4>Players</h4>
+      <ul id="players-${run.id}">Loading...</ul>
     `;
 
-    container.appendChild(div);
-    loadPlayersAdmin(run.id);
+    if (runDate >= today) {
+      upcoming.appendChild(div);
+    } else {
+      past.appendChild(div);
+    }
+
+    loadPlayers(run.id);
   });
 }
-  document.getElementById("datetime").addEventListener("change", function () {
-  const input = this.value;
-  if (!input) return;
 
-  const [date, time] = input.split("T");
-  let [hour, minute] = time.split(":").map(Number);
+// LOAD PLAYERS
+async function loadPlayers(id) {
+  const res = await fetch(`${API_URL}/api/players?run_id=${id}`);
+  const players = await res.json();
 
-  // round to nearest 15
-  minute = Math.round(minute / 15) * 15;
-  if (minute === 60) {
-    minute = 0;
-    hour += 1;
-  }
+  const html = players.map(p => `
+    <li>
+      ${p.name} (${p.status})
+      <select onchange="updatePayment(${p.reg_id}, this.value)">
+        <option value="unpaid" ${p.payment_status==="unpaid"?"selected":""}>Unpaid</option>
+        <option value="paid" ${p.payment_status==="paid"?"selected":""}>Paid</option>
+      </select>
+      <button onclick="removePlayer(${id}, '${p.email}')">Remove</button>
+    </li>
+  `).join("");
 
-  const newTime =
-    String(hour).padStart(2, "0") +
-    ":" +
-    String(minute).padStart(2, "0");
+  document.getElementById(`players-${id}`).innerHTML = html || "<li>No players</li>";
+}
 
-  this.value = `${date}T${newTime}`;
+// REMOVE PLAYER
+async function removePlayer(runId, email) {
+  if (!confirm("Remove player?")) return;
+
+  await fetch(`${API_URL}/api/cancel`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ run_id:runId, email })
+  });
+
+  loadRuns();
+}
+
+// UPDATE RUN
+async function updateRun(id) {
+  const datetime = document.getElementById(`date-${id}`).value;
+  const select = document.getElementById(`loc-${id}`);
+  const location = select.value;
+
+  const max = document.getElementById(`max-${id}`).value;
+  const notes = document.getElementById(`notes-${id}`).value;
+
+  await fetch(`${API_URL}/api/update-run`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ id, datetime, location, max_players:max, notes })
+  });
+
+  alert("Saved");
+}
+
+// DELETE RUN
+async function deleteRun(id) {
+  if (!confirm("Delete game?")) return;
+
+  await fetch(`${API_URL}/api/delete-run`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ id })
+  });
+
+  loadRuns();
+}
+
+// FORCE 15 MINUTES
+document.getElementById("datetime").addEventListener("change", function(){
+  let [d,t]=this.value.split("T");
+  let [h,m]=t.split(":").map(Number);
+  m=Math.round(m/15)*15;
+  if(m===60){m=0;h++;}
+  this.value=`${d}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
 });
 </script>
 
