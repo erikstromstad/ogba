@@ -170,15 +170,21 @@ async function loadPlayers(id) {
   const players = await res.json();
 
   const html = players.map(p => `
-    <li>
-      ${p.name} (${p.status})
+  <li>
+    <div>${p.name} (${p.status})</div>
+
+    <div class="player-controls">
       <select onchange="updatePayment(${p.reg_id}, this.value)">
         <option value="unpaid" ${p.payment_status==="unpaid"?"selected":""}>Unpaid</option>
         <option value="paid" ${p.payment_status==="paid"?"selected":""}>Paid</option>
       </select>
-      <button onclick="removePlayer(${id}, '${p.email}')">Remove</button>
-    </li>
-  `).join("");
+
+      <button class="delete-player" onclick="removePlayer(${id}, '${p.email}')">
+        Remove
+      </button>
+    </div>
+  </li>
+`).join("");
 
   document.getElementById(`players-${id}`).innerHTML = html || "<li>No players</li>";
 }
