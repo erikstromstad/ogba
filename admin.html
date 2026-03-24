@@ -9,10 +9,9 @@
 
 <body>
 
-<!-- ===== NAVBAR ===== -->
 <div class="navbar">
   <a href="/" class="logo">
-    <img src="OGBA-logo.png" alt="OGBA Logo" />
+    <img src="OGBA-logo.png" />
   </a>
 
   <div class="menu-toggle" onclick="toggleMenu()">&#9776;</div>
@@ -27,270 +26,123 @@
 
 <div class="container">
 
-  <h1>Admin - Add pickup game</h1>
+<h1>Admin</h1>
 
-  <!-- ===== LOGIN ===== -->
-  <div id="login">
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="checkPassword()">Enter</button>
-    <p id="error" style="color:red;"></p>
-  </div>
+<div id="login">
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="checkPassword()">Enter</button>
+</div>
 
-  <!-- ===== ADMIN CONTENT ===== -->
-  <div id="admin" style="display:none;">
+<div id="admin" style="display:none;">
 
-    <!-- ===== CREATE RUN ===== -->
-    <div class="admin-form">
-      <h2>Pickup game</h2>
+<!-- CREATE -->
+<div class="admin-form">
+  <h2>Create Game</h2>
 
-      <label>Date & Time:</label><br/>
-      <input type="datetime-local" id="datetime" /><br/><br/>
+  <input type="datetime-local" id="datetime" step="900" /><br/><br/>
 
-      <label>Location Name:</label><br/>
-      <input type="text" id="location" placeholder="Gym" /><br/><br/>
+  <select id="location">
+    <option value="">Select Location</option>
+    <option value="Eastside YMCA" data-map="https://maps.google.com/?q=Eastside+YMCA+St+Paul">Eastside YMCA</option>
+    <option value="Highland Park CC" data-map="https://maps.google.com/?q=Highland+Park+Community+Center+St+Paul">Highland Park CC</option>
+    <option value="Oxford CC" data-map="https://maps.google.com/?q=Oxford+Community+Center+St+Paul">Oxford CC</option>
+  </select><br/><br/>
 
-      <label>Max Players:</label><br/>
-      <input type="number" id="max" value="20" /><br/><br/>
+  <input type="number" id="max" value="20" /><br/><br/>
+  <input type="text" id="notes" placeholder="Doors open at 6:30" /><br/><br/>
 
-      <label>Notes:</label><br/>
-      <input type="text" id="notes" placeholder="Doors open at 6:30" /><br/><br/>
+  <button onclick="createRun()">Add Game</button>
+</div>
 
-      <button onclick="createRun()">Add to schedule</button>
+<h2>Upcoming Games</h2>
+<div id="upcoming" class="admin-grid"></div>
 
-      <p id="message"></p>
-    </div>
+<h2>Past Games</h2>
+<div id="past" class="admin-grid"></div>
 
-    <!-- ===== EXISTING RUNS ===== -->
-    <h2>Existing Games</h2>
-    <div id="runs" class="admin-grid"></div>
-
-  </div>
-
+</div>
 </div>
 
 <script>
-/* ===== NAV TOGGLE ===== */
 function toggleMenu() {
-  const nav = document.getElementById("navLinks");
-  nav.classList.toggle("active");
+  document.getElementById("navLinks").classList.toggle("active");
 }
 
-/* ===== CONFIG ===== */
 const PASSWORD = "Adrian";
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
-/* ===== LOGIN ===== */
 function checkPassword() {
-  const input = document.getElementById("password").value;
-
-  if (input === PASSWORD) {
+  if (document.getElementById("password").value === PASSWORD) {
     document.getElementById("login").style.display = "none";
     document.getElementById("admin").style.display = "block";
     loadRuns();
-  } else {
-    document.getElementById("error").innerText = "Wrong password";
   }
 }
 
-/* ===== CREATE RUN ===== */
 async function createRun() {
   const datetime = document.getElementById("datetime").value;
-  const location = document.getElementById("location").value;
+  const locationSelect = document.getElementById("location");
+  const location = locationSelect.value;
+  const map_link = locationSelect.options[locationSelect.selectedIndex].dataset.map;
+
   const max = document.getElementById("max").value;
   const notes = document.getElementById("notes").value;
 
-  if (!datetime || !location) {
-    alert("Fill out all fields");
-    return;
-  }
-
-  const res = await fetch(`${API_URL}/api/create-run`, {
+  await fetch(`${API_URL}/api/create-run`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
       datetime,
       location,
+      map_link,
       max_players: max,
       notes
     })
   });
 
-  const data = await res.json();
-
-  if (data.success) {
-    document.getElementById("message").innerText = "Game created!";
-    loadRuns();
-  } else {
-    document.getElementById("message").innerText = "Error creating game";
-  }
+  loadRuns();
 }
 
-/* ===== FORMAT DATE (NO TIMEZONE BUG) ===== */
-function formatDateTime(dateString) {
-  const [datePart, timePart] = dateString.split("T");
-
-  const [year, month, day] = datePart.split("-");
-  const [hour, minute] = timePart.split(":");
-
-  const dateObj = new Date(year, month - 1, day, hour, minute);
-
-  const formattedDate = dateObj.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "numeric",
-    day: "numeric",
-    year: "numeric"
-  });
-
-  const formattedTime = dateObj.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit"
-  });
-
-  return `${formattedDate} at ${formattedTime}`;
-}
-
-/* ===== LOAD RUNS ===== */
 async function loadRuns() {
   const res = await fetch(`${API_URL}/api/runs`);
   const runs = await res.json();
 
-  const container = document.getElementById("runs");
-  container.innerHTML = "";
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  document.getElementById("upcoming").innerHTML = "";
+  document.getElementById("past").innerHTML = "";
 
   runs.forEach(run => {
+    const runDate = new Date(run.start_time);
+    runDate.setHours(0,0,0,0);
+
+    const container = runDate >= today
+      ? document.getElementById("upcoming")
+      : document.getElementById("past");
+
     const div = document.createElement("div");
     div.className = "card";
 
-    const date = run.start_time.slice(0,16);
-
     div.innerHTML = `
       <strong>${run.location_name}</strong><br/>
-      <small>${formatDateTime(run.start_time)}</small><br/><br/>
+      <small>${new Date(run.start_time).toLocaleString()}</small><br/><br/>
 
-      <input type="datetime-local" value="${date}" id="date-${run.id}" />
+      <a href="${run.map_link}" target="_blank">View Map</a><br/><br/>
+
+      <input type="datetime-local" value="${run.start_time.slice(0,16)}" id="date-${run.id}" />
       <input value="${run.location_name}" id="loc-${run.id}" />
       <input type="number" value="${run.max_players}" id="max-${run.id}" />
-      <input value="${run.notes || ""}" placeholder="Notes" id="notes-${run.id}" />
+      <input value="${run.notes || ""}" id="notes-${run.id}" />
 
       <button onclick="updateRun(${run.id})">Save</button>
-      <button onclick="deleteRun(${run.id})">Delete Game</button>
+      <button onclick="deleteRun(${run.id})">Delete</button>
 
-      <h4>Players</h4>
-      <ul id="players-${run.id}" class="player-list">Loading...</ul>
+      <ul id="players-${run.id}"></ul>
     `;
 
     container.appendChild(div);
-
     loadPlayersAdmin(run.id);
-  });
-}
-
-/* ===== LOAD PLAYERS ===== */
-async function loadPlayersAdmin(runId) {
-  const res = await fetch(`${API_URL}/api/players?run_id=${runId}`);
-  const players = await res.json();
-
-  const list = players.map(p => {
-    return `
-      <li>
-        ${p.name} (${p.status}) 
-<select onchange="updatePayment(${p.reg_id}, this.value)">
-  <option value="unpaid" ${p.payment_status === "unpaid" ? "selected" : ""}>Unpaid</option>
-  <option value="paid" ${p.payment_status === "paid" ? "selected" : ""}>Paid</option>
-</select>
-
-<button class="delete-player" onclick="removePlayer(${runId}, '${p.email}')">Remove</button>
-  
-      </li>
-    `;
-  }).join("");
-
-  document.getElementById(`players-${runId}`).innerHTML = list || "<li>No players</li>";
-}
-
-/* ===== REMOVE PLAYER ===== */
-async function removePlayer(runId, email) {
-  if (!confirm("Remove this player?")) return;
-
-  const res = await fetch(`${API_URL}/api/cancel`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      run_id: runId,
-      email: email
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    loadRuns();
-  } else {
-    alert("Error removing player");
-  }
-}
-
-/* ===== UPDATE RUN ===== */
-async function updateRun(id) {
-  const datetime = document.getElementById(`date-${id}`).value;
-  const location = document.getElementById(`loc-${id}`).value;
-  const max = document.getElementById(`max-${id}`).value;
-  const notes = document.getElementById(`notes-${id}`).value;
-
-  const res = await fetch(`${API_URL}/api/update-run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      id,
-      datetime,
-      location,
-      max_players: max,
-      notes
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    alert("Updated");
-  } else {
-    alert("Error updating");
-  }
-}
-
-/* ===== DELETE RUN ===== */
-async function deleteRun(id) {
-  if (!confirm("Delete this game?")) return;
-
-  const res = await fetch(`${API_URL}/api/delete-run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id })
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    loadRuns();
-  } else {
-    alert("Error deleting");
-  }
-}
-  /* ===== Update Payment ===== */
-  async function updatePayment(regId, status) {
-  await fetch(`${API_URL}/api/update-payment`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      reg_id: regId,
-      payment_status: status
-    })
   });
 }
 </script>
