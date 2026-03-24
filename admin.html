@@ -171,11 +171,14 @@ async function loadPlayers(id) {
   const html = players.map(p => `
     <li>
       ${p.name} (${p.status})
-      <select onchange="updatePayment(${p.reg_id}, this.value)">
-        <option value="unpaid" ${p.payment_status==="unpaid"?"selected":""}>Unpaid</option>
-        <option value="paid" ${p.payment_status==="paid"?"selected":""}>Paid</option>
-      </select>
-      <button onclick="removePlayer(${id}, '${p.email}')">Remove</button>
+ <div class="player-controls">
+  <select onchange="updatePayment(${p.reg_id}, this.value)">
+    <option value="unpaid" ${p.payment_status === "unpaid" ? "selected" : ""}>Unpaid</option>
+    <option value="paid" ${p.payment_status === "paid" ? "selected" : ""}>Paid</option>
+  </select>
+
+  <button onclick="removePlayer(${runId}, '${p.email}')">Remove</button>
+</div>
     </li>
   `).join("");
 
