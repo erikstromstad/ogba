@@ -30,7 +30,7 @@ a {
   justify-content: space-between;
 
   position: relative;
-  z-index: 10; /* 🔥 ensures it's clickable */
+  z-index: 10;
 }
 
 .logo img {
@@ -67,14 +67,13 @@ a {
   font-weight: bold;
 }
 
-/* ===== HERO VIDEO (RESTORED 🔥) ===== */
+/* ===== HERO VIDEO ===== */
 .hero-video {
   position: relative;
   height: 80vh;
   overflow: hidden;
 }
 
-/* Background video */
 .hero-video-bg {
   position: absolute;
   top: 50%;
@@ -86,7 +85,6 @@ a {
   z-index: 0;
 }
 
-/* Desktop vs mobile video */
 .desktop-video {
   display: block;
 }
@@ -95,7 +93,6 @@ a {
   display: none;
 }
 
-/* Overlay content */
 .hero-content {
   position: relative;
   z-index: 2;
@@ -110,20 +107,17 @@ a {
   padding: 20px;
 }
 
-/* Logo */
 .hero-logo {
   width: 360px;
   max-width: 80%;
   margin-bottom: 20px;
 }
 
-/* Buttons container */
 .hero-buttons {
   display: flex;
   gap: 15px;
 }
 
-/* Buttons */
 .btn {
   background: #fff;
   color: #000;
@@ -276,19 +270,26 @@ ul, ol {
     display: block;
   }
 
+  /* 🔥 LOGO WIDTH (source of truth) */
   .hero-logo {
     width: 90%;
     max-width: 280px;
+    margin-bottom: 15px; /* slightly tighter */
   }
 
+  /* 🔥 BUTTONS MATCH LOGO EXACTLY */
   .hero-buttons {
     flex-direction: column;
     width: 90%;
+    max-width: 280px;   /* ✅ MATCHES LOGO */
+    margin: 0 auto;
     gap: 10px;
   }
 
   .btn {
     width: 100%;
     font-size: 14px;
+    padding: 10px;
+    text-align: center;
   }
 }
