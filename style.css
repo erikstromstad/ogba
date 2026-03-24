@@ -361,3 +361,14 @@ ul, ol {
 li {
   margin-bottom: 8px;
 }
+
+ /* Location selector button */
+select {
+  width: 100%;
+  background: #222;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+}
