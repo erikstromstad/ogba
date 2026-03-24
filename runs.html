@@ -24,44 +24,39 @@
   </div>
 </div>
 
-<!-- LOGIN SCREEN -->
-<div id="login" class="container center">
-  <h2>Enter Password</h2>
-  <input type="password" id="password" placeholder="Password" />
-  <br/>
-  <button onclick="checkPassword()">Enter</button>
-  <p id="error" style="color:red;"></p>
-</div>
-
-<!-- PROTECTED CONTENT -->
-<div id="content" style="display:none;">
-  <div class="container">
-    <h1>Upcoming OGBA Pickup Games</h1>
-    <div id="runs"></div>
-  </div>
+<div class="container">
+  <h1>Upcoming OGBA Pickup Games</h1>
+  <div id="runs" class="admin-grid"></div>
 </div>
 
 <script>
 function toggleMenu() {
-  const nav = document.getElementById("navLinks");
-  nav.classList.toggle("active");
+  document.getElementById("navLinks").classList.toggle("active");
 }
-  
-const PASSWORD = "hoops4life";
+
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 
-/* ===== LOGIN ===== */
-function checkPassword() {
-  const input = document.getElementById("password").value;
+/* ===== FORMAT DATE (SAFE) ===== */
+function formatDateTime(dateString) {
+  const [datePart, timePart] = dateString.split("T");
+  const [year, month, day] = datePart.split("-");
+  const [hour, minute] = timePart.split(":");
 
-  if (input === PASSWORD) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("content").style.display = "block";
+  const dateObj = new Date(year, month - 1, day, hour, minute);
 
-    loadRuns(); // ✅ only load AFTER login
-  } else {
-    document.getElementById("error").innerText = "Wrong password";
-  }
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "numeric",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  const formattedTime = dateObj.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+
+  return `${formattedDate} at ${formattedTime}`;
 }
 
 /* ===== LOAD RUNS ===== */
@@ -72,32 +67,32 @@ async function loadRuns() {
   const container = document.getElementById("runs");
   container.innerHTML = "";
 
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
   runs.forEach(run => {
+
+    // 🔥 FILTER OUT PAST GAMES (DATE ONLY)
+    const runDate = new Date(run.start_time);
+    runDate.setHours(0,0,0,0);
+    if (runDate < today) return;
+
     const div = document.createElement("div");
     div.className = "card";
 
-    const [datePart, timePart] = run.start_time.split("T");
-    const [year, month, day] = datePart.split("-");
-    const [hour, minute] = timePart.split(":");
-
-    const dateObj = new Date(year, month - 1, day, hour, minute);
-
-    const formattedDate = dateObj.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "numeric",
-      day: "numeric",
-      year: "numeric"
-    });
-
-    const formattedTime = dateObj.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit"
-    });
-
     div.innerHTML = `
-      <h3>${formattedDate} at ${formattedTime}</h3>
-      <p>${run.location_name}</p>
+      <h3>${formatDateTime(run.start_time)}</h3>
+
+      <p><strong>${run.location_name}</strong></p>
+
+      ${run.map_link ? `
+        <p>
+          <a href="${run.map_link}" target="_blank">View Map</a>
+        </p>
+      ` : ""}
+
       <p><em>${run.notes || ""}</em></p>
+
       <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
 
       <input placeholder="Your name" id="name-${run.id}" />
@@ -182,8 +177,11 @@ async function leaveRun(id) {
 
   alert("Removed from run");
 
-  loadRuns(); // refresh
+  loadRuns();
 }
+
+/* INIT */
+loadRuns();
 </script>
 
 </body>
