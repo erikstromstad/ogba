@@ -190,12 +190,18 @@ button:hover {
 .admin-form input,
 .admin-form button {
   width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+.admin-form select {
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
 }
 
 /* Grid for existing games */
 .admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 
@@ -385,4 +391,11 @@ select {
   width: auto;      /* override full width */
   padding: 6px;
   font-size: 14px;
+}
+
+.card input,
+.card select {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
 }
