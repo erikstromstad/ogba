@@ -372,3 +372,17 @@ select {
   font-size: 16px;
   border-radius: 6px;
 }
+
+.player-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.player-controls select,
+.player-controls button {
+  flex: 1;          /* equal width */
+  width: auto;      /* override full width */
+  padding: 6px;
+  font-size: 14px;
+}
