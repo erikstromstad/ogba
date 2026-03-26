@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +95,16 @@ async function createRun() {
   loadRuns();
 }
 
-// FORMAT DATE (SAFE)
+// 🔥 FIX ADDED HERE (payment save)
+async function updatePayment(reg_id, payment_status) {
+  await fetch(`${API_URL}/api/update-payment`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ reg_id, payment_status })
+  });
+}
+
+// FORMAT DATE
 function formatDate(dateString) {
   const [d,t] = dateString.split("T");
   const [y,m,day] = d.split("-");
