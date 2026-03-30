@@ -78,21 +78,56 @@ function checkPassword() {
 }
 
 // CREATE
+
 async function createRun() {
   const datetime = document.getElementById("datetime").value;
   const select = document.getElementById("location");
   const location = select.value;
-  const map_link = select.options[select.selectedIndex].dataset.map;
+  const map_link = select.options[select.selectedIndex]?.dataset.map || "";
   const max = document.getElementById("max").value;
   const notes = document.getElementById("notes").value;
 
-  await fetch(`${API_URL}/api/create-run`, {
+  if (!datetime) {
+    alert("Please choose a date and time.");
+    return;
+  }
+
+  if (!location) {
+    alert("Please choose a location.");
+    return;
+  }
+
+  if (!max || Number(max) < 1) {
+    alert("Please enter a valid max player count.");
+    return;
+  }
+
+  const res = await fetch(`${API_URL}/api/create-run`, {
     method: "POST",
     headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ datetime, location, map_link, max_players:max, notes })
+    body: JSON.stringify({
+      datetime,
+      location,
+      map_link,
+      max_players: Number(max),
+      notes
+    })
   });
 
+  const data = await res.json();
+
+  if (!data.success) {
+    alert(data.error || "Could not create game.");
+    return;
+  }
+
+  document.getElementById("datetime").value = "";
+  document.getElementById("max").value = "20";
+  document.getElementById("notes").value = "";
+
   loadRuns();
+}
+
 }
 
 // 🔥 FIX ADDED HERE (payment save)
