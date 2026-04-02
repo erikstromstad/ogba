@@ -26,6 +26,12 @@
 
 <div class="container">
   <h1>Upcoming OGBA Pickup Games</h1>
+  <div id="auth-status" class="card auth-status">Checking sign-in status...</div>
+  <div id="runs-signin-card" class="card auth-status" style="display:none;">
+    <div class="clerk-auth-wrap">
+      <div id="runs-signin-root" class="clerk-auth-root"></div>
+    </div>
+  </div>
   <div id="runs" class="admin-grid"></div>
 </div>
 
@@ -34,7 +40,38 @@ function toggleMenu() {
   document.getElementById("navLinks").classList.toggle("active");
 }
 
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
+const CLERK_JS_URL = "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
+const CLERK_APPEARANCE = {
+  variables: {
+    colorPrimary: "#ffffff",
+    colorBackground: "#000000",
+    colorInputBackground: "#111111",
+    colorInputText: "#ffffff",
+    colorText: "#ffffff",
+    colorTextSecondary: "#cccccc",
+    colorNeutral: "#333333",
+    borderRadius: "10px"
+  },
+  elements: {
+    socialButtonsBlockButton: {
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      border: "1px solid #d7d7d7"
+    },
+    socialButtonsProviderIcon: {
+      color: "#000000"
+    },
+    formButtonPrimary: {
+      backgroundColor: "#222222",
+      color: "#ffffff",
+      border: "1px solid #444444"
+    }
+  }
+};
+let authReady = false;
+let activeUser = null;
 
 /* ===== FORMAT DATE (SAFE) ===== */
 function formatDateTime(dateString) {
@@ -95,8 +132,8 @@ async function loadRuns() {
 
       <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
 
-      <input placeholder="Your name" id="name-${run.id}" />
-      <input placeholder="Your email" id="email-${run.id}" />
+      <input placeholder="Your name" id="name-${run.id}" ${activeUser ? "readonly" : ""}/>
+      <input placeholder="Your email" id="email-${run.id}" ${activeUser ? "readonly" : ""}/>
 
       <button onclick="joinRun(${run.id})">I'm In</button>
       <button onclick="leaveRun(${run.id})">Cancel</button>
@@ -112,6 +149,11 @@ async function loadRuns() {
 
 /* ===== SIGNUP ===== */
 async function joinRun(id) {
+  if (!authReady || !activeUser) {
+    alert("Please sign in below before registering.");
+    return;
+  }
+
   const name = document.getElementById(`name-${id}`).value;
   const email = document.getElementById(`email-${id}`).value;
 
@@ -120,19 +162,29 @@ async function joinRun(id) {
     return;
   }
 
-  const res = await fetch(`${API_URL}/api/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      run_id: id,
-      name,
-      email
-    })
-  });
+  let data;
+  try {
+    const res = await fetch(`${API_URL}/api/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        run_id: id,
+        name,
+        email,
+        clerk_user_id: activeUser.id
+      })
+    });
 
-  const data = await res.json();
+    data = await res.json();
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Could not register for this game.");
+    }
+  } catch (err) {
+    alert(err.message || "Could not register for this game.");
+    return;
+  }
 
   alert(
     data.status === "confirmed"
@@ -157,6 +209,11 @@ async function loadPlayers(runId) {
 
 /* ===== CANCEL ===== */
 async function leaveRun(id) {
+  if (!authReady || !activeUser) {
+    alert("Please sign in below before canceling.");
+    return;
+  }
+
   const email = document.getElementById(`email-${id}`).value;
 
   if (!email) {
@@ -164,24 +221,110 @@ async function leaveRun(id) {
     return;
   }
 
-  await fetch(`${API_URL}/api/cancel`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      run_id: id,
-      email
-    })
-  });
+  try {
+    const res = await fetch(`${API_URL}/api/cancel`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        run_id: id,
+        email,
+        clerk_user_id: activeUser.id
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Could not cancel registration.");
+    }
+  } catch (err) {
+    alert(err.message || "Could not cancel registration.");
+    return;
+  }
 
   alert("Removed from run");
 
   loadRuns();
 }
 
+async function initAuth() {
+  const authStatus = document.getElementById("auth-status");
+  const signInCard = document.getElementById("runs-signin-card");
+  const signInRoot = document.getElementById("runs-signin-root");
+
+  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes("REPLACE_ME")) {
+    authStatus.textContent = "Set Clerk publishable key in register.html and runs.html to enable auth.";
+    return;
+  }
+
+  await loadClerkScript();
+  await window.Clerk.load();
+  activeUser = window.Clerk.user || null;
+  authReady = true;
+
+  if (activeUser) {
+    const fullName = [activeUser.firstName, activeUser.lastName].filter(Boolean).join(" ");
+    const primaryEmail = activeUser.primaryEmailAddress?.emailAddress || "";
+    authStatus.innerHTML = `
+      <div class="auth-header-row">
+        <div>Signed in as <strong>${fullName || activeUser.username || "User"}</strong> (${primaryEmail})</div>
+        <button id="runs-logout-btn" class="secondary-btn" type="button">Log out</button>
+      </div>
+    `;
+    signInCard.style.display = "none";
+    document.getElementById("runs-logout-btn").addEventListener("click", async () => {
+      await window.Clerk.signOut({ redirectUrl: "/runs.html" });
+    });
+  } else {
+    authStatus.innerHTML = `You are not signed in yet. Sign in below, or <a href=\"/register.html\">create an account</a>.`;
+    signInCard.style.display = "block";
+    window.Clerk.mountSignIn(signInRoot, {
+      signUpUrl: "/register.html",
+      forceRedirectUrl: "/runs.html",
+      appearance: CLERK_APPEARANCE
+    });
+  }
+
+  await loadRuns();
+}
+
+function loadClerkScript() {
+  if (window.Clerk) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = CLERK_JS_URL;
+    script.setAttribute("data-clerk-publishable-key", CLERK_PUBLISHABLE_KEY);
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Clerk script failed to load"));
+    document.head.appendChild(script);
+  });
+}
+
+function populateIdentityFields() {
+  if (!activeUser) return;
+
+  const fullName = [activeUser.firstName, activeUser.lastName].filter(Boolean).join(" ");
+  const primaryEmail = activeUser.primaryEmailAddress?.emailAddress || "";
+
+  document.querySelectorAll("[id^='name-']").forEach(el => {
+    if (!el.value) el.value = fullName;
+  });
+
+  document.querySelectorAll("[id^='email-']").forEach(el => {
+    if (!el.value) el.value = primaryEmail;
+  });
+}
+
 /* INIT */
-loadRuns();
+initAuth()
+  .then(populateIdentityFields)
+  .catch(() => {
+    document.getElementById("auth-status").textContent = "Clerk failed to load. Refresh and try again.";
+  });
 </script>
 
 </body>
