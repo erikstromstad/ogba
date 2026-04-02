@@ -43,7 +43,9 @@
 
   <div id="signed-out-auth" class="card">
     <h2>Create your account</h2>
-    <div id="clerk-auth-root"></div>
+    <div class="clerk-auth-wrap">
+      <div id="clerk-auth-root" class="clerk-auth-root"></div>
+    </div>
   </div>
 
   <div id="signed-in-auth" class="card" style="display:none;">
@@ -92,7 +94,18 @@ async function initClerkAuth() {
       window.Clerk.mountSignIn(authRoot, {
         signUpUrl: "/register.html",
         forceRedirectUrl: "/runs.html",
-        appearance: { variables: { colorPrimary: "#ffffff" } }
+        appearance: {
+          variables: {
+            colorPrimary: "#ffffff",
+            colorBackground: "#000000",
+            colorInputBackground: "#111111",
+            colorInputText: "#ffffff",
+            colorText: "#ffffff",
+            colorTextSecondary: "#cccccc",
+            colorNeutral: "#333333",
+            borderRadius: "10px"
+          }
+        }
       });
       return;
     }
@@ -100,7 +113,18 @@ async function initClerkAuth() {
     window.Clerk.mountSignUp(authRoot, {
       signInUrl: "/runs.html",
       forceRedirectUrl: "/runs.html",
-      appearance: { variables: { colorPrimary: "#ffffff" } }
+      appearance: {
+        variables: {
+          colorPrimary: "#ffffff",
+          colorBackground: "#000000",
+          colorInputBackground: "#111111",
+          colorInputText: "#ffffff",
+          colorText: "#ffffff",
+          colorTextSecondary: "#cccccc",
+          colorNeutral: "#333333",
+          borderRadius: "10px"
+        }
+      }
     });
   };
 

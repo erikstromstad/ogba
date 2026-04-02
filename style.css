@@ -144,6 +144,17 @@ a {
   margin-bottom: 20px;
 }
 
+.clerk-auth-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.clerk-auth-root {
+  width: 100%;
+  max-width: 420px;
+}
+
 /* ===== Inputs ===== */
 input,
 select,

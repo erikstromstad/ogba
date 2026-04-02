@@ -34,7 +34,9 @@
   <div id="auth-status" class="card auth-status">Checking sign-in status...</div>
   <div id="runs-signin-card" class="card auth-status" style="display:none;">
     <h2>Sign in to join or cancel games</h2>
-    <div id="runs-signin-root"></div>
+    <div class="clerk-auth-wrap">
+      <div id="runs-signin-root" class="clerk-auth-root"></div>
+    </div>
   </div>
   <div id="runs" class="admin-grid"></div>
 </div>
@@ -251,7 +253,18 @@ async function initAuth() {
     window.Clerk.mountSignIn(signInRoot, {
       signUpUrl: "/register.html",
       forceRedirectUrl: "/runs.html",
-      appearance: { variables: { colorPrimary: "#ffffff" } }
+      appearance: {
+        variables: {
+          colorPrimary: "#ffffff",
+          colorBackground: "#000000",
+          colorInputBackground: "#111111",
+          colorInputText: "#ffffff",
+          colorText: "#ffffff",
+          colorTextSecondary: "#cccccc",
+          colorNeutral: "#333333",
+          borderRadius: "10px"
+        }
+      }
     });
   }
 
