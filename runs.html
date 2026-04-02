@@ -5,6 +5,12 @@
   <meta charset="UTF-8">
   <title>Upcoming OGBA Pickup Games</title>
   <link rel="stylesheet" href="style.css">
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="pk_test_REPLACE_ME"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js">
+  </script>
 </head>
 
 <body>
@@ -26,6 +32,7 @@
 
 <div class="container">
   <h1>Upcoming OGBA Pickup Games</h1>
+  <div id="auth-status" class="card auth-status">Checking sign-in status...</div>
   <div id="runs" class="admin-grid"></div>
 </div>
 
@@ -34,7 +41,10 @@ function toggleMenu() {
   document.getElementById("navLinks").classList.toggle("active");
 }
 
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
+let authReady = false;
+let activeUser = null;
 
 /* ===== FORMAT DATE (SAFE) ===== */
 function formatDateTime(dateString) {
@@ -95,8 +105,8 @@ async function loadRuns() {
 
       <p><strong>${run.player_count} / ${run.max_players}</strong> players</p>
 
-      <input placeholder="Your name" id="name-${run.id}" />
-      <input placeholder="Your email" id="email-${run.id}" />
+      <input placeholder="Your name" id="name-${run.id}" ${activeUser ? "readonly" : ""}/>
+      <input placeholder="Your email" id="email-${run.id}" ${activeUser ? "readonly" : ""}/>
 
       <button onclick="joinRun(${run.id})">I'm In</button>
       <button onclick="leaveRun(${run.id})">Cancel</button>
@@ -112,6 +122,12 @@ async function loadRuns() {
 
 /* ===== SIGNUP ===== */
 async function joinRun(id) {
+  if (!authReady || !activeUser) {
+    alert("Please sign in on the Register page first.");
+    window.location.href = "/register.html";
+    return;
+  }
+
   const name = document.getElementById(`name-${id}`).value;
   const email = document.getElementById(`email-${id}`).value;
 
@@ -123,12 +139,14 @@ async function joinRun(id) {
   const res = await fetch(`${API_URL}/api/signup`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${await window.Clerk.session.getToken()}`
     },
     body: JSON.stringify({
       run_id: id,
       name,
-      email
+      email,
+      clerk_user_id: activeUser.id
     })
   });
 
@@ -157,6 +175,12 @@ async function loadPlayers(runId) {
 
 /* ===== CANCEL ===== */
 async function leaveRun(id) {
+  if (!authReady || !activeUser) {
+    alert("Please sign in on the Register page first.");
+    window.location.href = "/register.html";
+    return;
+  }
+
   const email = document.getElementById(`email-${id}`).value;
 
   if (!email) {
@@ -167,11 +191,13 @@ async function leaveRun(id) {
   await fetch(`${API_URL}/api/cancel`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${await window.Clerk.session.getToken()}`
     },
     body: JSON.stringify({
       run_id: id,
-      email
+      email,
+      clerk_user_id: activeUser.id
     })
   });
 
@@ -180,8 +206,51 @@ async function leaveRun(id) {
   loadRuns();
 }
 
+async function initAuth() {
+  const authStatus = document.getElementById("auth-status");
+
+  if (!window.Clerk) {
+    authStatus.textContent = "Clerk failed to load. Refresh and try again.";
+    return;
+  }
+
+  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes("REPLACE_ME")) {
+    authStatus.textContent = "Set Clerk publishable key in register.html and runs.html to enable auth.";
+    return;
+  }
+
+  await window.Clerk.load({ publishableKey: CLERK_PUBLISHABLE_KEY });
+  activeUser = window.Clerk.user || null;
+  authReady = true;
+
+  if (activeUser) {
+    const fullName = [activeUser.firstName, activeUser.lastName].filter(Boolean).join(" ");
+    const primaryEmail = activeUser.primaryEmailAddress?.emailAddress || "";
+    authStatus.innerHTML = `Signed in as <strong>${fullName || activeUser.username || "User"}</strong> (${primaryEmail})`;
+  } else {
+    authStatus.innerHTML = `You are not signed in. <a href=\"/register.html\">Sign in / create account</a> first.`;
+  }
+
+  await loadRuns();
+}
+
+function populateIdentityFields() {
+  if (!activeUser) return;
+
+  const fullName = [activeUser.firstName, activeUser.lastName].filter(Boolean).join(" ");
+  const primaryEmail = activeUser.primaryEmailAddress?.emailAddress || "";
+
+  document.querySelectorAll("[id^='name-']").forEach(el => {
+    if (!el.value) el.value = fullName;
+  });
+
+  document.querySelectorAll("[id^='email-']").forEach(el => {
+    if (!el.value) el.value = primaryEmail;
+  });
+}
+
 /* INIT */
-loadRuns();
+initAuth().then(populateIdentityFields);
 </script>
 
 </body>
