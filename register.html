@@ -42,23 +42,51 @@
   <div id="clerk-warning" class="card" style="display:none;"></div>
 
   <div id="signed-out-auth" class="card">
-    <h2>Create your account</h2>
     <div class="clerk-auth-wrap">
       <div id="clerk-auth-root" class="clerk-auth-root"></div>
     </div>
   </div>
 
   <div id="signed-in-auth" class="card" style="display:none;">
-    <h2>You're signed in</h2>
-    <div id="clerk-user-root"></div>
+    <div class="auth-header-row">
+      <div id="register-auth-status">Signed in</div>
+      <button id="register-logout-btn" class="secondary-btn" type="button">Log out</button>
+    </div>
     <p><a href="/runs.html">Go to Games to register or cancel →</a></p>
   </div>
 
 </div>
 
 <script>
-const CLERK_PUBLISHABLE_KEY = "pk_test_Y2FyaW5nLWJlYXItNzAuY2xlcmsuYWNjb3VudHMuZGV2JA";
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
 const CLERK_JS_URL = "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+const CLERK_APPEARANCE = {
+  variables: {
+    colorPrimary: "#ffffff",
+    colorBackground: "#000000",
+    colorInputBackground: "#111111",
+    colorInputText: "#ffffff",
+    colorText: "#ffffff",
+    colorTextSecondary: "#cccccc",
+    colorNeutral: "#333333",
+    borderRadius: "10px"
+  },
+  elements: {
+    socialButtonsBlockButton: {
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      border: "1px solid #d7d7d7"
+    },
+    socialButtonsProviderIcon: {
+      color: "#000000"
+    },
+    formButtonPrimary: {
+      backgroundColor: "#222222",
+      color: "#ffffff",
+      border: "1px solid #444444"
+    }
+  }
+};
 
 function toggleMenu() {
   const nav = document.getElementById("navLinks");
@@ -79,9 +107,12 @@ async function initClerkAuth() {
 
   const render = () => {
     if (window.Clerk.user) {
+      const fullName = [window.Clerk.user.firstName, window.Clerk.user.lastName].filter(Boolean).join(" ");
+      const primaryEmail = window.Clerk.user.primaryEmailAddress?.emailAddress || "";
       signedOut.style.display = "none";
       signedIn.style.display = "block";
-      window.Clerk.mountUserButton(document.getElementById("clerk-user-root"));
+      document.getElementById("register-auth-status").innerHTML =
+        `Signed in as <strong>${fullName || window.Clerk.user.username || "User"}</strong> (${primaryEmail})`;
       return;
     }
 
@@ -94,18 +125,7 @@ async function initClerkAuth() {
       window.Clerk.mountSignIn(authRoot, {
         signUpUrl: "/register.html",
         forceRedirectUrl: "/runs.html",
-        appearance: {
-          variables: {
-            colorPrimary: "#ffffff",
-            colorBackground: "#000000",
-            colorInputBackground: "#111111",
-            colorInputText: "#ffffff",
-            colorText: "#ffffff",
-            colorTextSecondary: "#cccccc",
-            colorNeutral: "#333333",
-            borderRadius: "10px"
-          }
-        }
+        appearance: CLERK_APPEARANCE
       });
       return;
     }
@@ -113,23 +133,16 @@ async function initClerkAuth() {
     window.Clerk.mountSignUp(authRoot, {
       signInUrl: "/runs.html",
       forceRedirectUrl: "/runs.html",
-      appearance: {
-        variables: {
-          colorPrimary: "#ffffff",
-          colorBackground: "#000000",
-          colorInputBackground: "#111111",
-          colorInputText: "#ffffff",
-          colorText: "#ffffff",
-          colorTextSecondary: "#cccccc",
-          colorNeutral: "#333333",
-          borderRadius: "10px"
-        }
-      }
+      appearance: CLERK_APPEARANCE
     });
   };
 
   render();
   window.Clerk.addListener(render);
+
+  document.getElementById("register-logout-btn").addEventListener("click", async () => {
+    await window.Clerk.signOut({ redirectUrl: "/register.html" });
+  });
 }
 
 function showClerkWarning(msg) {
