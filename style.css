@@ -140,6 +140,47 @@ a {
   border-radius: 10px;
 }
 
+.auth-status {
+  margin-bottom: 20px;
+}
+
+.clerk-auth-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.clerk-auth-root {
+  width: 100%;
+  max-width: 420px;
+}
+
+.clerk-auth-root button {
+  width: auto;
+  margin-top: 0;
+}
+
+.auth-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.secondary-btn {
+  background: #111;
+  color: #fff;
+  border: 1px solid #444;
+  width: auto;
+  margin: 0;
+  padding: 8px 14px;
+}
+
+.secondary-btn:hover {
+  background: #222;
+}
+
 /* ===== Inputs ===== */
 input,
 select,
@@ -291,5 +332,10 @@ ul, ol {
     font-size: 14px;
     padding: 10px;
     text-align: center;
+  }
+
+  .auth-header-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
