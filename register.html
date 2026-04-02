@@ -31,20 +31,126 @@
   <h1><strong>Register to join the League</strong></h1>
 
   <p>
-    This is placeholder text for registration instructions.
+    Create your account first, then use the Games page to join and cancel registrations.
   </p>
 
-  <p>
-     This page will include a real signup form, waiver, and payment system.
-  </p>
+  <div id="clerk-warning" class="card" style="display:none;"></div>
+
+  <div id="signed-out-auth" class="card">
+    <h2>Create your account</h2>
+    <div class="clerk-auth-wrap">
+      <div id="clerk-auth-root" class="clerk-auth-root"></div>
+    </div>
+  </div>
+
+  <div id="signed-in-auth" class="card" style="display:none;">
+    <h2>You're signed in</h2>
+    <div id="clerk-user-root"></div>
+    <p><a href="/runs.html">Go to Games to register or cancel →</a></p>
+  </div>
 
 </div>
 
 <script>
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
+const CLERK_JS_URL = "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+
 function toggleMenu() {
   const nav = document.getElementById("navLinks");
   nav.classList.toggle("active");
 }
+
+async function initClerkAuth() {
+  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes("REPLACE_ME")) {
+    showClerkWarning("Set your Clerk publishable key in register.html and runs.html before enabling auth.");
+    return;
+  }
+
+  await loadClerkScript();
+  await window.Clerk.load();
+
+  const signedOut = document.getElementById("signed-out-auth");
+  const signedIn = document.getElementById("signed-in-auth");
+
+  const render = () => {
+    if (window.Clerk.user) {
+      signedOut.style.display = "none";
+      signedIn.style.display = "block";
+      window.Clerk.mountUserButton(document.getElementById("clerk-user-root"));
+      return;
+    }
+
+    signedIn.style.display = "none";
+    signedOut.style.display = "block";
+    const mode = new URLSearchParams(window.location.search).get("mode");
+    const authRoot = document.getElementById("clerk-auth-root");
+
+    if (mode === "signin") {
+      window.Clerk.mountSignIn(authRoot, {
+        signUpUrl: "/register.html",
+        forceRedirectUrl: "/runs.html",
+        appearance: {
+          variables: {
+            colorPrimary: "#ffffff",
+            colorBackground: "#000000",
+            colorInputBackground: "#111111",
+            colorInputText: "#ffffff",
+            colorText: "#ffffff",
+            colorTextSecondary: "#cccccc",
+            colorNeutral: "#333333",
+            borderRadius: "10px"
+          }
+        }
+      });
+      return;
+    }
+
+    window.Clerk.mountSignUp(authRoot, {
+      signInUrl: "/runs.html",
+      forceRedirectUrl: "/runs.html",
+      appearance: {
+        variables: {
+          colorPrimary: "#ffffff",
+          colorBackground: "#000000",
+          colorInputBackground: "#111111",
+          colorInputText: "#ffffff",
+          colorText: "#ffffff",
+          colorTextSecondary: "#cccccc",
+          colorNeutral: "#333333",
+          borderRadius: "10px"
+        }
+      }
+    });
+  };
+
+  render();
+  window.Clerk.addListener(render);
+}
+
+function showClerkWarning(msg) {
+  const warning = document.getElementById("clerk-warning");
+  warning.textContent = msg;
+  warning.style.display = "block";
+}
+
+function loadClerkScript() {
+  if (window.Clerk) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = CLERK_JS_URL;
+    script.setAttribute("data-clerk-publishable-key", CLERK_PUBLISHABLE_KEY);
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Clerk script failed to load"));
+    document.head.appendChild(script);
+  });
+}
+
+initClerkAuth().catch(() => {
+  showClerkWarning("Clerk script failed to load. Refresh and try again.");
+});
 </script>
 
 </body>

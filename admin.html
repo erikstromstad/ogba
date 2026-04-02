@@ -195,7 +195,8 @@ async function loadRuns() {
       <button onclick="deleteRun(${run.id})">Delete</button>
 
       <h4>Players</h4>
-      <ul id="players-${run.id}" class="player-list">Loading...</ul>
+      <button id="toggle-btn-${run.id}" onclick="togglePlayers(${run.id})">Expand Players</button>
+      <ul id="players-${run.id}" class="player-list" style="display:none;">Loading...</ul>
     `;
 
     if (runDate >= today) {
@@ -206,6 +207,15 @@ async function loadRuns() {
 
     loadPlayers(run.id);
   });
+}
+
+function togglePlayers(runId) {
+  const playersList = document.getElementById(`players-${runId}`);
+  const toggleBtn = document.getElementById(`toggle-btn-${runId}`);
+  const isHidden = playersList.style.display === "none";
+
+  playersList.style.display = isHidden ? "block" : "none";
+  toggleBtn.textContent = isHidden ? "Collapse" : "Expand Players";
 }
 
 async function loadPlayers(id) {
