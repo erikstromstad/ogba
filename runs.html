@@ -44,7 +44,8 @@ function toggleMenu() {
   document.getElementById("navLinks").classList.toggle("active");
 }
 
-const CLERK_PUBLISHABLE_KEY = "pk_test_Y2FyaW5nLWJlYXItNzAuY2xlcmsuYWNjb3VudHMuZGV2JA";
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
+const CLERK_JS_URL = "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 let authReady = false;
 let activeUser = null;
@@ -212,17 +213,13 @@ async function initAuth() {
   const signInCard = document.getElementById("runs-signin-card");
   const signInRoot = document.getElementById("runs-signin-root");
 
-  if (!window.Clerk) {
-    authStatus.textContent = "Clerk failed to load. Refresh and try again.";
-    return;
-  }
-
   if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes("REPLACE_ME")) {
     authStatus.textContent = "Set Clerk publishable key in register.html and runs.html to enable auth.";
     return;
   }
 
-  await window.Clerk.load({ publishableKey: CLERK_PUBLISHABLE_KEY });
+  await loadClerkScript();
+  await window.Clerk.load();
   activeUser = window.Clerk.user || null;
   authReady = true;
 
@@ -244,6 +241,21 @@ async function initAuth() {
   await loadRuns();
 }
 
+function loadClerkScript() {
+  if (window.Clerk) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = CLERK_JS_URL;
+    script.setAttribute("data-clerk-publishable-key", CLERK_PUBLISHABLE_KEY);
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Clerk script failed to load"));
+    document.head.appendChild(script);
+  });
+}
+
 function populateIdentityFields() {
   if (!activeUser) return;
 
@@ -260,7 +272,11 @@ function populateIdentityFields() {
 }
 
 /* INIT */
-initAuth().then(populateIdentityFields);
+initAuth()
+  .then(populateIdentityFields)
+  .catch(() => {
+    document.getElementById("auth-status").textContent = "Clerk failed to load. Refresh and try again.";
+  });
 </script>
 
 </body>
