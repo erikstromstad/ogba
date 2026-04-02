@@ -139,21 +139,29 @@ async function joinRun(id) {
     return;
   }
 
-  const res = await fetch(`${API_URL}/api/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${await window.Clerk.session.getToken()}`
-    },
-    body: JSON.stringify({
-      run_id: id,
-      name,
-      email,
-      clerk_user_id: activeUser.id
-    })
-  });
+  let data;
+  try {
+    const res = await fetch(`${API_URL}/api/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        run_id: id,
+        name,
+        email,
+        clerk_user_id: activeUser.id
+      })
+    });
 
-  const data = await res.json();
+    data = await res.json();
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Could not register for this game.");
+    }
+  } catch (err) {
+    alert(err.message || "Could not register for this game.");
+    return;
+  }
 
   alert(
     data.status === "confirmed"
@@ -190,18 +198,27 @@ async function leaveRun(id) {
     return;
   }
 
-  await fetch(`${API_URL}/api/cancel`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${await window.Clerk.session.getToken()}`
-    },
-    body: JSON.stringify({
-      run_id: id,
-      email,
-      clerk_user_id: activeUser.id
-    })
-  });
+  try {
+    const res = await fetch(`${API_URL}/api/cancel`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        run_id: id,
+        email,
+        clerk_user_id: activeUser.id
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Could not cancel registration.");
+    }
+  } catch (err) {
+    alert(err.message || "Could not cancel registration.");
+    return;
+  }
 
   alert("Removed from run");
 
