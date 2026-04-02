@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - OGBA</title>
   <link rel="stylesheet" href="style.css">
+  <script
+    async
+    crossorigin="anonymous"
+    src="https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js">
+  </script>
 </head>
 
 <body>
@@ -31,20 +36,88 @@
   <h1><strong>Register to join the League</strong></h1>
 
   <p>
-    This is placeholder text for registration instructions.
+    Create your account first, then use the Games page to join and cancel registrations.
   </p>
 
-  <p>
-     This page will include a real signup form, waiver, and payment system.
-  </p>
+  <div id="clerk-warning" class="card" style="display:none;"></div>
+
+  <div id="signed-out-auth" class="card">
+    <h2>Create your account</h2>
+    <div id="clerk-auth-root"></div>
+  </div>
+
+  <div id="signed-in-auth" class="card" style="display:none;">
+    <h2>You're signed in</h2>
+    <div id="clerk-user-root"></div>
+    <p><a href="/runs.html">Go to Games to register or cancel →</a></p>
+  </div>
 
 </div>
 
 <script>
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
+
 function toggleMenu() {
   const nav = document.getElementById("navLinks");
   nav.classList.toggle("active");
 }
+
+async function initClerkAuth() {
+  if (!window.Clerk) {
+    showClerkWarning("Clerk script failed to load. Refresh and try again.");
+    return;
+  }
+
+  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes("REPLACE_ME")) {
+    showClerkWarning("Set your Clerk publishable key in register.html and runs.html before enabling auth.");
+    return;
+  }
+
+  await window.Clerk.load({ publishableKey: CLERK_PUBLISHABLE_KEY });
+
+  const signedOut = document.getElementById("signed-out-auth");
+  const signedIn = document.getElementById("signed-in-auth");
+
+  const render = () => {
+    if (window.Clerk.user) {
+      signedOut.style.display = "none";
+      signedIn.style.display = "block";
+      window.Clerk.mountUserButton(document.getElementById("clerk-user-root"));
+      return;
+    }
+
+    signedIn.style.display = "none";
+    signedOut.style.display = "block";
+    const mode = new URLSearchParams(window.location.search).get("mode");
+    const authRoot = document.getElementById("clerk-auth-root");
+
+    if (mode === "signin") {
+      window.Clerk.mountSignIn(authRoot, {
+        signUpUrl: "/register.html",
+        forceRedirectUrl: "/runs.html",
+        appearance: { variables: { colorPrimary: "#ffffff" } }
+      });
+      return;
+    }
+
+    window.Clerk.mountSignUp(authRoot, {
+      signInUrl: "/runs.html",
+      forceRedirectUrl: "/runs.html",
+      appearance: { variables: { colorPrimary: "#ffffff" } }
+    });
+  };
+
+  render();
+  window.Clerk.addListener(render);
+}
+
+function showClerkWarning(msg) {
+  const warning = document.getElementById("clerk-warning");
+  warning.textContent = msg;
+  warning.style.display = "block";
+}
+
+initClerkAuth();
 </script>
 
 </body>
