@@ -140,6 +140,10 @@ a {
   border-radius: 10px;
 }
 
+.auth-status {
+  margin-bottom: 20px;
+}
+
 /* ===== Inputs ===== */
 input,
 select,
