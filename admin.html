@@ -26,9 +26,16 @@
 
   <h1>Admin</h1>
 
-  <div id="login">
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="checkPassword()">Enter</button>
+  <div id="admin-auth-status" class="card auth-status">Checking sign-in status...</div>
+
+  <div id="admin-signin-card" class="card auth-status" style="display:none;">
+    <div class="clerk-auth-wrap">
+      <div id="admin-signin-root" class="clerk-auth-root"></div>
+    </div>
+  </div>
+
+  <div id="admin-unauthorized" class="card auth-status" style="display:none;">
+    You are signed in, but you do not have admin privileges for this page.
   </div>
 
   <div id="admin" style="display:none;">
@@ -60,22 +67,135 @@
 </div>
 
 <script>
-const PASSWORD = "Adrian";
+const CLERK_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
+const CLERK_JS_URL = "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+const ADMIN_ALLOWED_USER_IDS = [
+  "user_REPLACE_WITH_YOUR_CLERK_USER_ID"
+];
+const ADMIN_ALLOWED_EMAILS = [
+  "REPLACE_WITH_ADMIN_EMAIL@example.com"
+];
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
+const CLERK_APPEARANCE = {
+  variables: {
+    colorPrimary: "#ffffff",
+    colorBackground: "#000000",
+    colorInputBackground: "#111111",
+    colorInputText: "#ffffff",
+    colorText: "#ffffff",
+    colorTextSecondary: "#cccccc",
+    colorNeutral: "#333333",
+    borderRadius: "10px"
+  },
+  elements: {
+    socialButtonsBlockButton: {
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      border: "1px solid #d7d7d7"
+    },
+    socialButtonsProviderIcon: {
+      color: "#000000"
+    },
+    formButtonPrimary: {
+      backgroundColor: "#222222",
+      color: "#ffffff",
+      border: "1px solid #444444"
+    }
+  }
+};
+let activeUser = null;
+let adminAuthorized = false;
 
 function toggleMenu() {
   document.getElementById("navLinks").classList.toggle("active");
 }
 
-function checkPassword() {
-  if (document.getElementById("password").value === PASSWORD) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("admin").style.display = "block";
-    loadRuns();
+function isAllowedAdmin(user) {
+  if (!user) return false;
+
+  const cleanAllowedIds = ADMIN_ALLOWED_USER_IDS.filter(id => !id.includes("REPLACE_WITH"));
+  const cleanAllowedEmails = ADMIN_ALLOWED_EMAILS
+    .filter(email => !email.includes("REPLACE_WITH"))
+    .map(email => email.toLowerCase());
+
+  const userEmail = (user.primaryEmailAddress?.emailAddress || "").toLowerCase();
+  return cleanAllowedIds.includes(user.id) || cleanAllowedEmails.includes(userEmail);
+}
+
+async function initAdminAuth() {
+  const authStatus = document.getElementById("admin-auth-status");
+  const signInCard = document.getElementById("admin-signin-card");
+  const signInRoot = document.getElementById("admin-signin-root");
+  const unauthorized = document.getElementById("admin-unauthorized");
+  const adminPanel = document.getElementById("admin");
+
+  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes("REPLACE_ME")) {
+    authStatus.textContent = "Set Clerk publishable key in admin.html to enable admin auth.";
+    return;
   }
+
+  await loadClerkScript();
+  await window.Clerk.load();
+  activeUser = window.Clerk.user || null;
+
+  if (!activeUser) {
+    adminAuthorized = false;
+    adminPanel.style.display = "none";
+    unauthorized.style.display = "none";
+    signInCard.style.display = "block";
+    authStatus.textContent = "Sign in with Clerk to access admin tools.";
+    window.Clerk.mountSignIn(signInRoot, {
+      signUpUrl: "/register.html",
+      forceRedirectUrl: "/admin.html",
+      appearance: CLERK_APPEARANCE
+    });
+    return;
+  }
+
+  const fullName = [activeUser.firstName, activeUser.lastName].filter(Boolean).join(" ");
+  const primaryEmail = activeUser.primaryEmailAddress?.emailAddress || "";
+  authStatus.innerHTML = `
+    <div class="auth-header-row">
+      <div>Signed in as <strong>${fullName || activeUser.username || "User"}</strong> (${primaryEmail})</div>
+      <button id="admin-logout-btn" class="secondary-btn" type="button">Log out</button>
+    </div>
+  `;
+  document.getElementById("admin-logout-btn").addEventListener("click", async () => {
+    await window.Clerk.signOut({ redirectUrl: "/admin.html" });
+  });
+
+  signInCard.style.display = "none";
+  adminAuthorized = isAllowedAdmin(activeUser);
+
+  if (!adminAuthorized) {
+    adminPanel.style.display = "none";
+    unauthorized.style.display = "block";
+    return;
+  }
+
+  unauthorized.style.display = "none";
+  adminPanel.style.display = "block";
+  await loadRuns();
+}
+
+function loadClerkScript() {
+  if (window.Clerk) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = CLERK_JS_URL;
+    script.setAttribute("data-clerk-publishable-key", CLERK_PUBLISHABLE_KEY);
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Clerk script failed to load"));
+    document.head.appendChild(script);
+  });
 }
 
 async function createRun() {
+  if (!adminAuthorized) return;
+
   const datetime = document.getElementById("datetime").value;
   const select = document.getElementById("location");
   const location = select.value;
@@ -126,6 +246,8 @@ async function createRun() {
 }
 
 async function updatePayment(reg_id, payment_status) {
+  if (!adminAuthorized) return;
+
   await fetch(`${API_URL}/api/update-payment`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -155,6 +277,8 @@ function formatDate(dateString) {
 }
 
 async function loadRuns() {
+  if (!adminAuthorized) return;
+
   const res = await fetch(`${API_URL}/api/runs`);
   const runs = await res.json();
 
@@ -195,7 +319,8 @@ async function loadRuns() {
       <button onclick="deleteRun(${run.id})">Delete</button>
 
       <h4>Players</h4>
-      <ul id="players-${run.id}" class="player-list">Loading...</ul>
+      <button id="toggle-btn-${run.id}" onclick="togglePlayers(${run.id})">Expand Players</button>
+      <ul id="players-${run.id}" class="player-list" style="display:none;">Loading...</ul>
     `;
 
     if (runDate >= today) {
@@ -208,7 +333,18 @@ async function loadRuns() {
   });
 }
 
+function togglePlayers(runId) {
+  const playersList = document.getElementById(`players-${runId}`);
+  const toggleBtn = document.getElementById(`toggle-btn-${runId}`);
+  const isHidden = playersList.style.display === "none";
+
+  playersList.style.display = isHidden ? "block" : "none";
+  toggleBtn.textContent = isHidden ? "Collapse" : "Expand Players";
+}
+
 async function loadPlayers(id) {
+  if (!adminAuthorized) return;
+
   const res = await fetch(`${API_URL}/api/players?run_id=${id}`);
   const players = await res.json();
 
@@ -231,6 +367,7 @@ async function loadPlayers(id) {
 }
 
 async function removePlayer(runId, email) {
+  if (!adminAuthorized) return;
   if (!confirm("Remove player?")) return;
 
   await fetch(`${API_URL}/api/cancel`, {
@@ -243,6 +380,8 @@ async function removePlayer(runId, email) {
 }
 
 async function updateRun(id) {
+  if (!adminAuthorized) return;
+
   const datetime = document.getElementById(`date-${id}`).value;
   const select = document.getElementById(`loc-${id}`);
   const location = select.value;
@@ -265,6 +404,7 @@ async function updateRun(id) {
 }
 
 async function deleteRun(id) {
+  if (!adminAuthorized) return;
   if (!confirm("Delete game?")) return;
 
   await fetch(`${API_URL}/api/delete-run`, {
@@ -293,6 +433,10 @@ document.getElementById("datetime").addEventListener("change", function () {
   }
 
   this.value = `${d}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+});
+
+initAdminAuth().catch(() => {
+  document.getElementById("admin-auth-status").textContent = "Clerk failed to load. Refresh and try again.";
 });
 </script>
 
