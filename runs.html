@@ -33,6 +33,10 @@
 <div class="container">
   <h1>Upcoming OGBA Pickup Games</h1>
   <div id="auth-status" class="card auth-status">Checking sign-in status...</div>
+  <div id="runs-signin-card" class="card auth-status" style="display:none;">
+    <h2>Sign in to join or cancel games</h2>
+    <div id="runs-signin-root"></div>
+  </div>
   <div id="runs" class="admin-grid"></div>
 </div>
 
@@ -123,8 +127,7 @@ async function loadRuns() {
 /* ===== SIGNUP ===== */
 async function joinRun(id) {
   if (!authReady || !activeUser) {
-    alert("Please sign in on the Register page first.");
-    window.location.href = "/register.html";
+    alert("Please sign in below before registering.");
     return;
   }
 
@@ -176,8 +179,7 @@ async function loadPlayers(runId) {
 /* ===== CANCEL ===== */
 async function leaveRun(id) {
   if (!authReady || !activeUser) {
-    alert("Please sign in on the Register page first.");
-    window.location.href = "/register.html";
+    alert("Please sign in below before canceling.");
     return;
   }
 
@@ -208,6 +210,8 @@ async function leaveRun(id) {
 
 async function initAuth() {
   const authStatus = document.getElementById("auth-status");
+  const signInCard = document.getElementById("runs-signin-card");
+  const signInRoot = document.getElementById("runs-signin-root");
 
   if (!window.Clerk) {
     authStatus.textContent = "Clerk failed to load. Refresh and try again.";
@@ -227,8 +231,15 @@ async function initAuth() {
     const fullName = [activeUser.firstName, activeUser.lastName].filter(Boolean).join(" ");
     const primaryEmail = activeUser.primaryEmailAddress?.emailAddress || "";
     authStatus.innerHTML = `Signed in as <strong>${fullName || activeUser.username || "User"}</strong> (${primaryEmail})`;
+    signInCard.style.display = "none";
   } else {
-    authStatus.innerHTML = `You are not signed in. <a href=\"/register.html\">Sign in / create account</a> first.`;
+    authStatus.innerHTML = `You are not signed in yet. Sign in below, or <a href=\"/register.html\">create an account</a>.`;
+    signInCard.style.display = "block";
+    window.Clerk.mountSignIn(signInRoot, {
+      signUpUrl: "/register.html",
+      forceRedirectUrl: "/runs.html",
+      appearance: { variables: { colorPrimary: "#ffffff" } }
+    });
   }
 
   await loadRuns();

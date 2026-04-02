@@ -43,7 +43,7 @@
   <div id="clerk-warning" class="card" style="display:none;"></div>
 
   <div id="signed-out-auth" class="card">
-    <h2>Sign Up / Log In</h2>
+    <h2>Create your account</h2>
     <div id="clerk-auth-root"></div>
   </div>
 
@@ -89,7 +89,21 @@ async function initClerkAuth() {
 
     signedIn.style.display = "none";
     signedOut.style.display = "block";
-    window.Clerk.mountSignIn(document.getElementById("clerk-auth-root"), {
+    const mode = new URLSearchParams(window.location.search).get("mode");
+    const authRoot = document.getElementById("clerk-auth-root");
+
+    if (mode === "signin") {
+      window.Clerk.mountSignIn(authRoot, {
+        signUpUrl: "/register.html",
+        forceRedirectUrl: "/runs.html",
+        appearance: { variables: { colorPrimary: "#ffffff" } }
+      });
+      return;
+    }
+
+    window.Clerk.mountSignUp(authRoot, {
+      signInUrl: "/runs.html",
+      forceRedirectUrl: "/runs.html",
       appearance: { variables: { colorPrimary: "#ffffff" } }
     });
   };
