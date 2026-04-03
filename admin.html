@@ -66,14 +66,16 @@
   </div>
 </div>
 
+<script src="/clerk-config.js"></script>
 <script>
-const CLERK_PUBLISHABLE_KEY = "pk_test_Y2FyaW5nLWJlYXItNzAuY2xlcmsuYWNjb3VudHMuZGV2JA";
-const CLERK_JS_URL = "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
-const ADMIN_ALLOWED_USER_IDS = [
-  "user_3BmlrXRquE7ExImnKX2Rs9Q55nN"
+const OGBA_CONFIG = window.OGBA_CONFIG || {};
+const CLERK_PUBLISHABLE_KEY = OGBA_CONFIG.clerkPublishableKey || "pk_test_REPLACE_ME";
+const CLERK_JS_URL = OGBA_CONFIG.clerkJsUrl || "https://caring-bear-70.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+const ADMIN_ALLOWED_USER_IDS = OGBA_CONFIG.adminAllowedUserIds || [
+  "user_REPLACE_WITH_YOUR_CLERK_USER_ID"
 ];
-const ADMIN_ALLOWED_EMAILS = [
-  "erikstromstad@gmail.com"
+const ADMIN_ALLOWED_EMAILS = OGBA_CONFIG.adminAllowedEmails || [
+  "REPLACE_WITH_ADMIN_EMAIL@example.com"
 ];
 const API_URL = "https://ogba-api.erikstromstad.workers.dev";
 const CLERK_APPEARANCE = {
@@ -340,6 +342,15 @@ function togglePlayers(runId) {
 
   playersList.style.display = isHidden ? "block" : "none";
   toggleBtn.textContent = isHidden ? "Collapse" : "Expand";
+}
+
+function togglePlayers(runId) {
+  const playersList = document.getElementById(`players-${runId}`);
+  const toggleBtn = document.getElementById(`toggle-btn-${runId}`);
+  const isHidden = playersList.style.display === "none";
+
+  playersList.style.display = isHidden ? "block" : "none";
+  toggleBtn.textContent = isHidden ? "Collapse" : "Expand Players";
 }
 
 function togglePlayers(runId) {

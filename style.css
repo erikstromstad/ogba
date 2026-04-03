@@ -72,9 +72,11 @@ a {
   position: relative;
   height: 80vh;
   overflow: hidden;
+  line-height: 0;
 }
 
 .hero-video-bg {
+  display: block;
   position: absolute;
   top: 50%;
   left: 50%;
