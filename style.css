@@ -89,6 +89,7 @@ a {
 
 .desktop-video {
   display: block;
+  object-position: center 55%;
 }
 
 .mobile-video {
