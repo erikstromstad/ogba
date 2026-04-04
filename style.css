@@ -1,7 +1,7 @@
 /* ===== Global ===== */
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Garamond, "Times New Roman", Times, serif;
   background-color: #000;
   color: #fff;
   font-size: 16px;
@@ -72,21 +72,26 @@ a {
   position: relative;
   height: 80vh;
   overflow: hidden;
+  line-height: 0;
 }
 
 .hero-video-bg {
+  display: block;
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  transform: translate(-50%, -50%);
+  transform: none;
   object-fit: cover;
   z-index: 0;
 }
 
 .desktop-video {
   display: block;
+  top: -2px;
+  height: calc(100% + 2px);
+  object-position: center 55%;
 }
 
 .mobile-video {
@@ -121,11 +126,15 @@ a {
 .btn {
   background: #fff;
   color: #000;
-  padding: 12px 20px;
+  padding: 13px 20px;
   border-radius: 8px;
   font-weight: bold;
   text-align: center;
   min-width: 110px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
@@ -140,25 +149,72 @@ a {
   border-radius: 10px;
 }
 
-/* ===== Inputs ===== */
-input,
-select,
-button {
+.auth-status {
+  margin-bottom: 20px;
+}
+
+.clerk-auth-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.clerk-auth-root {
+  width: 100%;
+  max-width: 420px;
+}
+
+.clerk-auth-root button {
+  width: auto;
+  margin-top: 0;
+}
+
+.auth-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.secondary-btn {
+  background: #111;
+  color: #fff;
+  border: 1px solid #444;
+  width: auto;
+  margin: 0;
+  padding: 8px 14px;
+}
+
+.secondary-btn:hover {
+  background: #222;
+}
+
+/* ===== Inputs / Buttons (site controls only) ===== */
+.admin-form input,
+.admin-form select,
+.admin-form button,
+.card > input,
+.card > select,
+.card > button:not(.secondary-btn) {
   padding: 10px;
   font-size: 14px;
   border-radius: 6px;
   border: 1px solid #333;
 }
 
-input,
-select {
+.admin-form input,
+.admin-form select,
+.card > input,
+.card > select {
   width: 100%;
   background: #222;
   color: #fff;
   box-sizing: border-box;
 }
 
-button {
+.admin-form button,
+.card > button:not(.secondary-btn) {
   background: #fff;
   color: #000;
   cursor: pointer;
@@ -167,7 +223,8 @@ button {
   margin-top: 6px;
 }
 
-button:hover {
+.admin-form button:hover,
+.card > button:not(.secondary-btn):hover {
   background: #ccc;
 }
 
@@ -253,7 +310,8 @@ ul, ol {
     padding: 15px;
   }
 
-  button {
+  .admin-form button,
+  .card > button:not(.secondary-btn) {
     margin-bottom: 8px;
   }
 
@@ -283,13 +341,18 @@ ul, ol {
     width: 90%;
     max-width: 280px;   /* ✅ MATCHES LOGO */
     margin: 0 auto;
-    gap: 10px;
+    gap: 12px;
   }
 
   .btn {
     width: 100%;
     font-size: 14px;
-    padding: 10px;
+    padding: 11px;
     text-align: center;
+  }
+
+  .auth-header-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
