@@ -1,7 +1,7 @@
 /* ===== Global ===== */
 body {
   margin: 0;
-  font-family: "Copperplate", "Copperplate Gothic Light", "Copperplate Gothic Bold", Arial, Helvetica, serif;
+  font-family: Garamond, "Times New Roman", Times, serif;
   background-color: #000;
   color: #fff;
   font-size: 16px;
@@ -126,12 +126,12 @@ a {
 .btn {
   background: #fff;
   color: #000;
-  padding: 14px 20px;
+  padding: 13px 20px;
   border-radius: 8px;
   font-weight: bold;
   text-align: center;
   min-width: 110px;
-  min-height: 48px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -341,13 +341,13 @@ ul, ol {
     width: 90%;
     max-width: 280px;   /* ✅ MATCHES LOGO */
     margin: 0 auto;
-    gap: 14px;
+    gap: 12px;
   }
 
   .btn {
     width: 100%;
     font-size: 14px;
-    padding: 12px;
+    padding: 11px;
     text-align: center;
   }
 
